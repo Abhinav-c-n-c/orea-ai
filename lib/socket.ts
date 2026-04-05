@@ -1,12 +1,13 @@
 import { io, Socket } from 'socket.io-client';
 
-// In development, connect directly to the backend to avoid Next.js dev-proxy
-// WebSocket upgrade limitations. Backend CORS already allows localhost:3800.
-// In production, use the same origin (empty string) which goes through the reverse proxy.
-const SOCKET_URL =
-  process.env.NEXT_PUBLIC_SOCKET_URL ||
-  process.env.NEXT_PUBLIC_API_URL ||
-  'http://localhost:3900';
+// In PRODUCTION (Vercel): connect to '/' — Next.js rewrites forward /socket.io/* to the backend.
+// Vercel's edge network handles WebSocket upgrades transparently.
+// In DEVELOPMENT: connect directly to the backend to bypass Next.js dev-server proxy limitations.
+const isProduction = process.env.NODE_ENV === 'production';
+
+const SOCKET_URL = isProduction
+  ? '/' // same-origin → Next.js rewrite → backend
+  : (process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3900');
 
 let socket: Socket | null = null;
 let isOnline = typeof navigator !== 'undefined' ? navigator.onLine : true;
@@ -49,7 +50,10 @@ export const connectSocket = (token: string): Socket => {
 
   socket = io(SOCKET_URL, {
     auth: { token },
-    transports: ['websocket', 'polling'],
+    // In production on Vercel, use polling only — serverless functions don't maintain
+    // persistent WebSocket connections. Polling works as regular HTTP requests.
+    // In dev, prefer WebSocket for real-time performance.
+    transports: isProduction ? ['polling'] : ['websocket', 'polling'],
     reconnection: true,
     reconnectionAttempts: Infinity,
     reconnectionDelay: 1000,
