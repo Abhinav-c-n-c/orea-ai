@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+
+# Environment — NEVER commit real secrets
+.env
+.env.local
+.env.production
+.env*.local
+
+# Next.js build output
+.next/
+out/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# TypeScript
+*.tsbuildinfo

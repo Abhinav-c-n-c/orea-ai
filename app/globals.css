@@ -1,0 +1,291 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+:root {
+  --sidebar-width: 260px;
+  --sidebar-collapsed-width: 72px;
+  --header-height: 64px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family:
+    'Inter',
+    system-ui,
+    -apple-system,
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f0fdfa;
+  color: #1a1d29;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
+}
+
+html.dark body {
+  background-color: #020617;
+  color: #f8fafc;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #99f6e4;
+  border-radius: 10px;
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+  background: #134e4a;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #14b8a6;
+}
+
+/* Smooth transitions */
+.transition-all-200 {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Glass morphism */
+.glass {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+html.dark .glass {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(51, 65, 85, 0.4);
+}
+
+/* Gradient text - teal */
+.gradient-text {
+  background: linear-gradient(135deg, #14b8a6, #0d9488, #0f766e);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Kanban columns */
+.kanban-column {
+  min-height: calc(100vh - 200px);
+}
+
+/* Rich text editor styles */
+.rich-text-content h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+.rich-text-content h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+.rich-text-content p {
+  margin-bottom: 0.5rem;
+  line-height: 1.6;
+}
+.rich-text-content ul {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+.rich-text-content ol {
+  list-style-type: decimal;
+  padding-left: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+.rich-text-content blockquote {
+  border-left: 3px solid #14b8a6;
+  padding-left: 1rem;
+  margin-bottom: 0.5rem;
+  color: #64748b;
+}
+.rich-text-content code {
+  background: #f0fdfa;
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+}
+.rich-text-content a {
+  color: #0d9488;
+  text-decoration: underline;
+}
+
+.rich-text-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  border: 1px solid #e2e8f0;
+  background: white;
+  font-size: 0.85rem;
+}
+html.dark .rich-text-content table {
+  border-color: #334155;
+  background: #0f172a;
+}
+.rich-text-content th, .rich-text-content td {
+  border: 1px solid #e2e8f0;
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  min-width: 80px;
+}
+html.dark .rich-text-content th, html.dark .rich-text-content td {
+  border-color: #334155;
+}
+.rich-text-content th {
+  background-color: #f1f5f9;
+  font-weight: 700;
+  color: #475569;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.025em;
+}
+html.dark .rich-text-content th {
+  background-color: #1e293b;
+  color: #94a3b8;
+}
+.rich-text-content tr:hover {
+  background-color: #f8fafc;
+}
+html.dark .rich-text-content tr:hover {
+  background-color: #1e293b/50;
+}
+
+/* Chat bubble animations */
+@keyframes messageFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.message-bubble {
+  animation: messageFadeIn 0.2s ease-out;
+}
+
+/* Loading skeleton */
+.skeleton {
+  background: linear-gradient(90deg, #ccfbf1 25%, #99f6e4 50%, #ccfbf1 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+html.dark .skeleton {
+  background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%);
+  background-size: 200% 100%;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Custom scrollbar for specific containers */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(20, 184, 166, 0.3);
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(20, 184, 166, 0.5);
+}
+
+/* Mobile sidebar overlay */
+@media (max-width: 768px) {
+  .sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 39;
+  }
+}
+
+/* Recording pulse animation */
+@keyframes recordPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.2);
+  }
+}
+
+.recording-pulse {
+  animation: recordPulse 1.5s infinite;
+}
+
+/* Blue tick styles */
+.tick-read {
+  color: #14b8a6;
+}
+
+.tick-delivered {
+  color: #94a3b8;
+}
+
+.tick-sent {
+  color: #cbd5e1;
+}
+
+/* Floating Background Orbs */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-20px) scale(1.05);
+  }
+}
+
+.animate-float {
+  animation: float 10s ease-in-out infinite;
+}
+
+.bg-orb {
+  filter: blur(140px);
+  opacity: 0.15;
+  pointer-events: none;
+}
+
+html.dark .bg-orb {
+  opacity: 0.1;
+}
