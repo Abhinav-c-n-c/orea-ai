@@ -1,4 +1,7 @@
 /** @type {import('next').NextConfig} */
+
+const NEXT_PUBLIC_API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:3900';
+
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
@@ -9,12 +12,22 @@ const nextConfig = {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
   },
   async rewrites() {
-    return [
-      {
-        source: '/api/:path*',
-        destination: 'http://localhost:3900/api/:path*',
-      },
-    ];
+    return {
+      beforeFiles: [
+        {
+          source: '/api/:path*',
+          destination: `${NEXT_PUBLIC_API_URL}/api/:path*`,
+        },
+        {
+          source: '/socket.io/:path*',
+          destination: `${NEXT_PUBLIC_API_URL}/socket.io/:path*`,
+        },
+        {
+          source: '/socket.io',
+          destination: `${NEXT_PUBLIC_API_URL}/socket.io`,
+        },
+      ],
+    };
   },
 };
 

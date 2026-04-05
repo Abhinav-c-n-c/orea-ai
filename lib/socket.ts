@@ -1,6 +1,12 @@
 import { io, Socket } from 'socket.io-client';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3900';
+// In development, connect directly to the backend to avoid Next.js dev-proxy
+// WebSocket upgrade limitations. Backend CORS already allows localhost:3800.
+// In production, use the same origin (empty string) which goes through the reverse proxy.
+const SOCKET_URL =
+  process.env.NEXT_PUBLIC_SOCKET_URL ||
+  process.env.NEXT_PUBLIC_API_URL ||
+  'http://localhost:3900';
 
 let socket: Socket | null = null;
 let isOnline = typeof navigator !== 'undefined' ? navigator.onLine : true;
@@ -34,8 +40,16 @@ export const connectSocket = (token: string): Socket => {
     return socket;
   }
 
-  socket = io(API_URL, {
+  // Disconnect any stale socket before creating a new one
+  if (socket) {
+    socket.removeAllListeners();
+    socket.disconnect();
+    socket = null;
+  }
+
+  socket = io(SOCKET_URL, {
     auth: { token },
+    transports: ['websocket', 'polling'],
     reconnection: true,
     reconnectionAttempts: Infinity,
     reconnectionDelay: 1000,
@@ -44,7 +58,7 @@ export const connectSocket = (token: string): Socket => {
   });
 
   socket.on('connect', () => {
-    console.log('🔌 Socket connected');
+    console.log('🔌 Socket connected:', socket?.id);
     notifyConnectionChange(true);
   });
 

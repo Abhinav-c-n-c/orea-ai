@@ -1,10 +1,15 @@
 import axios from 'axios';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
-console.log('Resolved API_URL:', API_URL || 'Using relative proxy');
+// In dev, connect directly to the backend to avoid CORS and proxy issues.
+// In production, the reverse proxy serves both frontend and backend from the same origin,
+// so we use relative paths which go through the Next.js rewrites.
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL
+    ? `${process.env.NEXT_PUBLIC_API_URL}/api`
+    : '/api';
 
 const api = axios.create({
-  baseURL: API_URL ? `${API_URL}/api` : '/api',
+  baseURL: API_BASE_URL,
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
@@ -14,7 +19,6 @@ const api = axios.create({
 // Request interceptor — attach token
 api.interceptors.request.use(
   (config) => {
-    console.log(`Making request to: ${config.baseURL}${config.url}`);
     if (typeof window !== 'undefined') {
       const token = localStorage.getItem('accessToken');
       if (token) {
@@ -69,7 +73,7 @@ api.interceptors.response.use(
 
       try {
         const { data } = await axios.post(
-          `${API_URL || ''}/api/auth/refresh-token`,
+          `${API_BASE_URL}/auth/refresh-token`,
           {},
           { withCredentials: true }
         );
