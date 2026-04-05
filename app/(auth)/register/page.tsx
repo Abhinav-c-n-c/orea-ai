@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../../store/authStore';
+import { motion, AnimatePresence } from 'framer-motion';
+import { FiUser, FiMail, FiLock, FiCheck, FiArrowRight, FiShield, FiZap, FiLayout } from 'react-icons/fi';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -34,120 +36,216 @@ export default function RegisterPage() {
   const displayError = localError || error;
 
   return (
-    <div className="min-h-screen flex">
-      {/* Left Panel */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary-600 via-primary-700 to-primary-900 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-20 left-20 w-72 h-72 rounded-full bg-white blur-3xl"></div>
-          <div className="absolute bottom-20 right-20 w-96 h-96 rounded-full bg-white blur-3xl"></div>
-        </div>
-        <div className="relative z-10 flex flex-col justify-center px-16">
-          <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center mb-8">
-            <svg className="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z" />
-            </svg>
+    <div className="min-h-screen flex items-center justify-center p-4 md:p-8 bg-surface-50 dark:bg-slate-950 relative overflow-hidden">
+      {/* Background Decor */}
+      <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-primary-100/30 dark:bg-primary-900/10 blur-[120px] pointer-events-none animate-pulse-soft"></div>
+      <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-accent-100/20 dark:bg-accent-900/5 blur-[120px] pointer-events-none animate-pulse-soft"></div>
+
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.6 }}
+        className="w-full max-w-7xl flex flex-col lg:flex-row gap-6 lg:gap-8 items-stretch"
+      >
+        {/* Left Card - Value Proposition */}
+        <div className="lg:w-[38%] bg-gradient-to-br from-sidebar to-sidebar-dark p-8 md:p-10 flex flex-col justify-between relative overflow-hidden rounded-[4px] shadow-2xl border border-white/5">
+          <div className="relative z-10 flex flex-col items-center text-center">
+            <motion.div whileHover={{ rotate: -5, scale: 1.1 }} className="mb-8 flex justify-center w-full">
+              <img
+                src="https://res.cloudinary.com/dybv5ghlb/image/upload/v1775387898/orea-logo_c0dkac.png"
+                alt="Orea Logo"
+                className="h-20 object-contain"
+              />
+            </motion.div>
+            
+            <h1 className="text-2xl md:text-3xl font-black text-white leading-tight uppercase tracking-tight mb-4">
+              Join the <br />
+              <span className="text-primary-300 font-black">Intelligence Network.</span>
+            </h1>
+            <p className="text-primary-100 text-sm font-medium leading-relaxed max-w-xs mb-8 opacity-80">
+              Create your account to unlock collaborative task management, real-time communication,
+              and industrial-grade note security.
+            </p>
+
+            <div className="space-y-6 border-t border-white/5 pt-8 mt-4 w-full max-w-[280px]">
+              {[
+                { 
+                  title: 'Secure Environment', 
+                  desc: 'Enterprise-grade encryption for every note and task.',
+                  icon: <FiShield className="w-5 h-5" />
+                },
+                { 
+                  title: 'Real-time Velocity', 
+                  desc: 'Instant synchronization across your entire workspace.',
+                  icon: <FiZap className="w-5 h-5" />
+                },
+                { 
+                  title: 'Infinite Workspace', 
+                  desc: 'Unlimited projects, notes, and collaborative nodes.',
+                  icon: <FiLayout className="w-5 h-5" />
+                }
+              ].map((feature, i) => (
+                <motion.div 
+                  key={i}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.2 + (i * 0.1) }}
+                  className="flex items-start gap-4 text-left group"
+                >
+                  <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-primary-300 group-hover:scale-110 group-hover:bg-primary-300 group-hover:text-sidebar transition-all duration-300">
+                    {feature.icon}
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-black text-white uppercase tracking-widest mb-1">{feature.title}</h4>
+                    <p className="text-xs text-primary-200/60 font-medium leading-relaxed">{feature.desc}</p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
           </div>
-          <h1 className="text-4xl font-bold text-white mb-4">Join Collab Today</h1>
-          <p className="text-primary-200 text-lg leading-relaxed max-w-md">
-            Start collaborating with your team. Manage tasks, share notes, and communicate
-            seamlessly.
-          </p>
+
+          <div className="mt-8 md:mt-12 relative z-10 flex flex-col items-center gap-3">
+            <div className="h-[1px] w-8 bg-white/10"></div>
+            <p className="text-[9px] font-black uppercase tracking-[0.2em] text-primary-300 text-center opacity-60">
+              Empowering Teams with Precision
+            </p>
+          </div>
         </div>
-      </div>
 
-      {/* Right Panel */}
-      <div className="flex-1 flex items-center justify-center px-8 py-12 bg-white">
-        <div className="w-full max-w-md">
-          <h2 className="text-2xl font-bold text-surface-900 mb-2">Create your account</h2>
-          <p className="text-surface-500 mb-8">Get started with your workspace</p>
+        {/* Right Card - Registration Form */}
+        <div className="flex-1 p-8 md:p-12 lg:p-16 flex flex-col justify-center bg-white dark:bg-slate-900 rounded-[4px] shadow-2xl border border-white/5">
+          <div className="max-w-sm mx-auto w-full">
+            <div className="mb-10 text-center">
+              <h2 className="text-3xl font-black text-surface-900 dark:text-white uppercase tracking-tight mb-2">
+                Initialise Node
+              </h2>
+              <p className="text-[10px] font-black text-surface-400 lowercase tracking-widest leading-loose">
+                Enrol in the network to begin area management protocol
+              </p>
+            </div>
 
-          {displayError && (
-            <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm flex items-center gap-2 animate-fade-in">
-              <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                <path
-                  fillRule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              <span>{displayError}</span>
-              <button
-                onClick={() => {
-                  clearError();
-                  setLocalError('');
-                }}
-                className="ml-auto text-red-500 hover:text-red-700"
+            <AnimatePresence mode="wait">
+              {displayError && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="mb-8 p-4 rounded-[4px] bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/20 text-red-700 dark:text-red-400 text-[10px] font-black uppercase tracking-widest flex items-center gap-3"
+                >
+                  <div className="w-6 h-6 rounded-full bg-red-100 dark:bg-red-500/20 flex items-center justify-center flex-shrink-0">
+                    ✕
+                  </div>
+                  <span className="flex-1">{displayError}</span>
+                  <button
+                    onClick={() => {
+                      clearError();
+                      setLocalError('');
+                    }}
+                    className="hover:text-red-900 dark:hover:text-red-300"
+                  >
+                    <FiArrowRight />
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-black text-surface-400 uppercase tracking-widest ml-1">
+                  Full Identity
+                </label>
+                <div className="relative group">
+                  <FiUser className="absolute left-4 top-1/2 -translate-y-1/2 text-surface-400 group-focus-within:text-primary-600 transition-colors" />
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="w-full pl-12 pr-4 py-3 bg-surface-50 dark:bg-slate-800/50 rounded-[4px] border border-primary-100 dark:border-slate-700 text-sm font-bold text-surface-900 dark:text-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all placeholder:text-surface-300"
+                    placeholder="Subject Name"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-black text-surface-400 uppercase tracking-widest ml-1">
+                  Email Allocation
+                </label>
+                <div className="relative group">
+                  <FiMail className="absolute left-4 top-1/2 -translate-y-1/2 text-surface-400 group-focus-within:text-primary-600 transition-colors" />
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full pl-12 pr-4 py-3 bg-surface-50 dark:bg-slate-800/50 rounded-[4px] border border-primary-100 dark:border-slate-700 text-sm font-bold text-surface-900 dark:text-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all placeholder:text-surface-300"
+                    placeholder="protocol@node.com"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-surface-400 uppercase tracking-widest ml-1">
+                    Pass-Key
+                  </label>
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full px-4 py-3 bg-surface-50 dark:bg-slate-800/50 rounded-[4px] border border-primary-100 dark:border-slate-700 text-sm font-bold text-surface-900 dark:text-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all placeholder:text-surface-300"
+                    placeholder="••••••"
+                    required
+                    minLength={6}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-surface-400 uppercase tracking-widest ml-1">
+                    Confirm
+                  </label>
+                  <input
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="w-full px-4 py-3 bg-surface-50 dark:bg-slate-800/50 rounded-[4px] border border-primary-100 dark:border-slate-700 text-sm font-bold text-surface-900 dark:text-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all placeholder:text-surface-300"
+                    placeholder="••••••"
+                    required
+                  />
+                </div>
+              </div>
+
+              <motion.button
+                type="submit"
+                disabled={isLoading}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="w-full mt-4 py-4 bg-gradient-to-r from-primary-600 to-primary-800 text-white font-black uppercase tracking-widest shadow-xl shadow-primary-500/20 hover:shadow-primary-500/40 rounded-[4px] transition-all disabled:opacity-50 group relative overflow-hidden"
               >
-                ✕
-              </button>
-            </div>
-          )}
+                <span className="relative z-10 flex items-center justify-center gap-2">
+                  {isLoading ? 'Initialising Node...' : 'Establish Connection'}
+                  <FiArrowRight className="group-hover:translate-x-1 transition-transform" />
+                </span>
+                <div className="absolute inset-0 bg-gradient-to-r from-primary-700 to-primary-900 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              </motion.button>
+            </form>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label className="block text-sm font-medium text-surface-700 mb-1.5">Full Name</label>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-surface-200 bg-surface-50 text-surface-800 focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all text-sm"
-                placeholder="John Doe"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-surface-700 mb-1.5">Email</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-surface-200 bg-surface-50 text-surface-800 focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all text-sm"
-                placeholder="you@example.com"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-surface-700 mb-1.5">Password</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-surface-200 bg-surface-50 text-surface-800 focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all text-sm"
-                placeholder="••••••"
-                required
-                minLength={6}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-surface-700 mb-1.5">
-                Confirm Password
-              </label>
-              <input
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-surface-200 bg-surface-50 text-surface-800 focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all text-sm"
-                placeholder="••••••"
-                required
-              />
-            </div>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-primary-600 to-primary-700 text-white font-semibold shadow-lg shadow-primary-500/25 hover:shadow-xl hover:shadow-primary-500/30 active:scale-[0.98] transition-all duration-200 disabled:opacity-50 text-sm"
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5 }}
+              className="mt-10 text-center text-[10px] font-black uppercase tracking-widest text-surface-500"
             >
-              {isLoading ? 'Creating account...' : 'Create Account'}
-            </button>
-          </form>
-
-          <p className="mt-8 text-center text-sm text-surface-500">
-            Already have an account?{' '}
-            <Link href="/login" className="text-primary-600 hover:text-primary-700 font-semibold">
-              Sign in
-            </Link>
-          </p>
+              Already Registered?{' '}
+              <Link
+                href="/login"
+                className="text-primary-600 hover:text-primary-700 border-b-2 border-primary-100 hover:border-primary-600 transition-all pb-0.5"
+              >
+                Subject Login
+              </Link>
+            </motion.p>
+          </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

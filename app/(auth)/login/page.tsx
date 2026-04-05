@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../../store/authStore';
+import { motion, AnimatePresence } from 'framer-motion';
+import { FiMail, FiLock, FiEye, FiEyeOff, FiCheck, FiArrowRight, FiShield, FiZap, FiLayout } from 'react-icons/fi';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -23,173 +25,232 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex">
-      {/* Left Panel - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary-600 via-primary-700 to-primary-900 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-20 left-20 w-72 h-72 rounded-full bg-white blur-3xl"></div>
-          <div className="absolute bottom-20 right-20 w-96 h-96 rounded-full bg-white blur-3xl"></div>
-        </div>
-        <div className="relative z-10 flex flex-col justify-center px-16">
-          <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center mb-8">
-            <svg className="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
-            </svg>
-          </div>
-          <h1 className="text-4xl font-bold text-white mb-4">Collab System</h1>
-          <p className="text-primary-200 text-lg leading-relaxed max-w-md">
-            Your team&apos;s command center. Manage tasks, collaborate on notes, and communicate in
-            real-time.
-          </p>
-          <div className="mt-12 flex gap-8">
-            <div>
-              <p className="text-3xl font-bold text-white">10k+</p>
-              <p className="text-primary-300 text-sm">Active Users</p>
-            </div>
-            <div>
-              <p className="text-3xl font-bold text-white">50k+</p>
-              <p className="text-primary-300 text-sm">Tasks Done</p>
-            </div>
-            <div>
-              <p className="text-3xl font-bold text-white">99.9%</p>
-              <p className="text-primary-300 text-sm">Uptime</p>
-            </div>
-          </div>
-        </div>
-      </div>
+    <div className="min-h-screen flex items-center justify-center p-4 md:p-8 bg-surface-50 dark:bg-slate-950 relative overflow-hidden">
+      {/* Background Decor */}
+      <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-primary-100/30 dark:bg-primary-900/10 blur-[120px] pointer-events-none animate-pulse-soft"></div>
+      <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-accent-100/20 dark:bg-accent-900/5 blur-[120px] pointer-events-none animate-pulse-soft"></div>
 
-      {/* Right Panel - Form */}
-      <div className="flex-1 flex items-center justify-center px-8 py-12 bg-white">
-        <div className="w-full max-w-md">
-          <div className="lg:hidden flex items-center gap-3 mb-8">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center">
-              <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z" />
-              </svg>
-            </div>
-            <span className="font-bold text-xl gradient-text">Collab</span>
+      <motion.div 
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: 'easeOut' }}
+        className="w-full max-w-7xl flex flex-col lg:flex-row gap-6 lg:gap-8 items-stretch"
+      >
+        {/* Left Card - Branding & Metrics */}
+        <div className="lg:w-[38%] bg-gradient-to-br from-sidebar to-sidebar-dark p-8 md:p-10 flex flex-col justify-between relative overflow-hidden group rounded-[4px] shadow-2xl border border-white/5">
+          <div className="absolute inset-0 opacity-10 pointer-events-none group-hover:opacity-15 transition-opacity duration-1000">
+            <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white/20 to-transparent"></div>
           </div>
 
-          <h2 className="text-2xl font-bold text-surface-900 mb-2">Welcome back</h2>
-          <p className="text-surface-500 mb-8">Sign in to continue to your workspace</p>
-
-          {error && (
-            <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm flex items-center gap-2 animate-fade-in">
-              <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                <path
-                  fillRule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              <span>{error}</span>
-              <button onClick={clearError} className="ml-auto text-red-500 hover:text-red-700">
-                ✕
-              </button>
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label className="block text-sm font-medium text-surface-700 mb-1.5">Email</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-surface-200 bg-surface-50 text-surface-800 focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all text-sm"
-                placeholder="you@example.com"
-                required
+          <div className="relative z-10 flex flex-col items-center text-center">
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              transition={{ type: 'spring', stiffness: 300 }}
+              className="mb-8 flex justify-center w-full"
+            >
+              <img
+                src="https://res.cloudinary.com/dybv5ghlb/image/upload/v1775387898/orea-logo_c0dkac.png"
+                alt="Orea Logo"
+                className="h-20 object-contain"
               />
-            </div>
+            </motion.div>
+            
+            <h1 className="text-2xl md:text-3xl font-black text-white leading-tight uppercase tracking-tight mb-4">
+              Organise Your <br />
+              <span className="text-primary-300">Area, Intelligently.</span>
+            </h1>
+            <p className="text-primary-100 text-sm font-medium leading-relaxed max-w-xs mb-6 opacity-80">
+              Welcome back to your central intelligence node. Orchestrate your projects, notes, and team data with mathematical precision.
+            </p>
 
-            <div>
-              <label className="block text-sm font-medium text-surface-700 mb-1.5">Password</label>
-              <div className="relative">
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border border-surface-200 bg-surface-50 text-surface-800 focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all text-sm pr-12"
-                  placeholder="••••••"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-surface-400 hover:text-surface-600 transition-colors"
+            <div className="space-y-6 border-t border-white/5 pt-8 mt-4 w-full max-w-[280px]">
+              {[
+                { 
+                  title: 'Secure Environment', 
+                  desc: 'Enterprise-grade encryption for every note and task.',
+                  icon: <FiShield className="w-5 h-5" />
+                },
+                { 
+                  title: 'Real-time Velocity', 
+                  desc: 'Instant synchronization across your entire workspace.',
+                  icon: <FiZap className="w-5 h-5" />
+                },
+                { 
+                  title: 'Infinite Workspace', 
+                  desc: 'Unlimited projects, notes, and collaborative nodes.',
+                  icon: <FiLayout className="w-5 h-5" />
+                }
+              ].map((feature, i) => (
+                <motion.div 
+                  key={i}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.2 + (i * 0.1) }}
+                  className="flex items-start gap-4 text-left group"
                 >
-                  {showPassword ? (
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={1.5}
-                        d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
-                      />
-                    </svg>
-                  ) : (
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={1.5}
-                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                      />
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={1.5}
-                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                      />
-                    </svg>
-                  )}
-                </button>
-              </div>
+                  <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-primary-300 group-hover:scale-110 group-hover:bg-primary-300 group-hover:text-sidebar transition-all duration-300">
+                    {feature.icon}
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-black text-white uppercase tracking-widest mb-1">{feature.title}</h4>
+                    <p className="text-xs text-primary-200/60 font-medium leading-relaxed">{feature.desc}</p>
+                  </div>
+                </motion.div>
+              ))}
             </div>
+          </div>
 
-            <div className="flex items-center justify-between">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  className="w-4 h-4 rounded border-surface-300 text-primary-600 focus:ring-primary-500"
-                />
-                <span className="text-sm text-surface-600">Remember me</span>
-              </label>
-              <Link
-                href="/forgot-password"
-                className="text-sm text-primary-600 hover:text-primary-700 font-medium"
-              >
-                Forgot password?
-              </Link>
-            </div>
-
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-primary-600 to-primary-700 text-white font-semibold shadow-lg shadow-primary-500/25 hover:shadow-xl hover:shadow-primary-500/30 hover:from-primary-700 hover:to-primary-800 active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-            >
-              {isLoading ? (
-                <div className="flex items-center justify-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                  Signing in...
-                </div>
-              ) : (
-                'Sign In'
-              )}
-            </button>
-          </form>
-
-          <p className="mt-8 text-center text-sm text-surface-500">
-            Don&apos;t have an account?{' '}
-            <Link
-              href="/register"
-              className="text-primary-600 hover:text-primary-700 font-semibold"
-            >
-              Create account
-            </Link>
-          </p>
+          <div className="mt-8 md:mt-12 relative z-10 flex flex-col items-center gap-3">
+            <div className="h-[1px] w-8 bg-white/10"></div>
+            <p className="text-[9px] font-black uppercase tracking-[0.2em] text-primary-300 text-center opacity-60">
+              The Next Evolution of Digital Workspace
+            </p>
+          </div>
         </div>
-      </div>
+
+        {/* Right Card - Login Form */}
+        <div className="flex-1 p-8 md:p-12 lg:p-16 flex flex-col justify-center bg-white dark:bg-slate-900 rounded-[4px] shadow-2xl border border-white/5">
+          <div className="max-w-sm mx-auto w-full">
+            <div className="mb-10">
+              <motion.h2
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.3 }}
+                className="text-3xl font-black text-surface-900 dark:text-white uppercase tracking-tight mb-2"
+              >
+                Welcome Back
+              </motion.h2>
+              <p className="text-[10px] font-black text-surface-400 lowercase tracking-widest">
+                Authenticate your session to return to the nexus
+              </p>
+            </div>
+
+            <AnimatePresence mode="wait">
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="mb-8 p-4 rounded-[4px] bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/20 text-red-700 dark:text-red-400 text-[10px] font-black uppercase tracking-widest flex items-center gap-3 overflow-hidden"
+                >
+                  <div className="w-6 h-6 rounded-full bg-red-100 dark:bg-red-500/20 flex items-center justify-center flex-shrink-0">
+                    ✕
+                  </div>
+                  <span className="flex-1">{error}</span>
+                  <button
+                    onClick={clearError}
+                    className="hover:text-red-900 dark:hover:text-red-300"
+                  >
+                    <FiArrowRight />
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-black text-surface-400 uppercase tracking-widest ml-1">
+                  Email Protocol
+                </label>
+                <div className="relative group">
+                  <FiMail className="absolute left-4 top-1/2 -translate-y-1/2 text-surface-400 group-focus-within:text-primary-600 transition-colors" />
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full pl-12 pr-4 py-3 bg-surface-50 dark:bg-slate-800/50 rounded-[4px] border border-primary-100 dark:border-slate-700 text-sm font-bold text-surface-900 dark:text-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all placeholder:text-surface-300 dark:placeholder:text-slate-600"
+                    placeholder="youremail@protocol.com"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-black text-surface-400 uppercase tracking-widest ml-1">
+                  Security Key
+                </label>
+                <div className="relative group">
+                  <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-surface-400 group-focus-within:text-primary-600 transition-colors" />
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full pl-12 pr-12 py-3 bg-surface-50 dark:bg-slate-800/50 rounded-[4px] border border-primary-100 dark:border-slate-700 text-sm font-bold text-surface-900 dark:text-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all placeholder:text-surface-300 dark:placeholder:text-slate-600"
+                    placeholder="••••••••"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-surface-400 hover:text-surface-600 transition-colors"
+                  >
+                    {showPassword ? <FiEyeOff /> : <FiEye />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between pb-2">
+                <label className="flex items-center gap-2 cursor-pointer group">
+                  <div className="relative flex items-center justify-center w-4 h-4 rounded border border-primary-200 dark:border-slate-700 bg-surface-50 dark:bg-slate-800 transition-all group-hover:border-primary-500">
+                    <input
+                      type="checkbox"
+                      className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10"
+                    />
+                    <FiCheck className="w-3 h-3 text-primary-600 opacity-0 peer-checked:opacity-100 transition-opacity" />
+                  </div>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-surface-500 group-hover:text-primary-600 transition-colors">
+                    Keep me active
+                  </span>
+                </label>
+                <Link
+                  href="/forgot-password"
+                  className="text-[10px] font-black uppercase tracking-widest text-primary-600 hover:text-primary-700 transition-colors"
+                >
+                  Forgot Key?
+                </Link>
+              </div>
+
+              <motion.button
+                type="submit"
+                disabled={isLoading}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="w-full py-4 bg-gradient-to-r from-primary-600 to-primary-800 text-white font-black uppercase tracking-widest shadow-xl shadow-primary-500/20 hover:shadow-primary-500/40 rounded-[4px] transition-all disabled:opacity-50 disabled:cursor-not-allowed group relative overflow-hidden"
+              >
+                <span className="relative z-10 flex items-center justify-center gap-2">
+                  {isLoading ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      Go Dashboard{' '}
+                      <FiArrowRight className="group-hover:translate-x-1 transition-transform" />
+                    </>
+                  )}
+                </span>
+                <div className="absolute inset-0 bg-gradient-to-r from-primary-700 to-primary-900 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              </motion.button>
+            </form>
+
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.6 }}
+              className="mt-10 text-center text-[10px] font-black uppercase tracking-widest text-surface-500"
+            >
+              Missing Node Access?{' '}
+              <Link
+                href="/register"
+                className="text-primary-600 hover:text-primary-700 border-b-2 border-primary-100 hover:border-primary-600 transition-all pb-0.5"
+              >
+                Register Entry
+              </Link>
+            </motion.p>
+          </div>
+        </div>
+      </motion.div>
     </div>
   );
 }
