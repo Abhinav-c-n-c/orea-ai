@@ -108,10 +108,28 @@ export const useSocket = () => {
     };
   }, [user]);
 
-  const sendMessage = (receiverId: string, content: string, messageType = 'text', mediaUrl?: string, encrypted?: boolean) => {
+  const sendMessage = async (receiverId: string, content: string, messageType = 'text', mediaUrl?: string, encrypted?: boolean) => {
     const socket = getSocket();
     if (socket?.connected) {
+      // Use socket when connected (real-time)
       socket.emit('message:send', { receiverId, content, messageType, mediaUrl, encrypted });
+    } else {
+      // HTTP fallback when socket is not available (e.g. Vercel serverless)
+      try {
+        const { data } = await import('../lib/axios').then(m => m.default.post('/chat/send', {
+          receiverId,
+          content,
+          messageType,
+          mediaUrl,
+          encrypted,
+        }));
+        // Manually add message to local state so it appears immediately
+        if (data?.data) {
+          useChatStore.getState().addMessage(data.data);
+        }
+      } catch (err) {
+        console.error('Failed to send message via HTTP:', err);
+      }
     }
   };
 
