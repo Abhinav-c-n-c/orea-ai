@@ -1,15 +1,10 @@
 import axios from 'axios';
 
-// In dev, connect directly to the backend to avoid CORS and proxy issues.
-// In production, the reverse proxy serves both frontend and backend from the same origin,
-// so we use relative paths which go through the Next.js rewrites.
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL
-    ? `${process.env.NEXT_PUBLIC_API_URL}/api`
-    : '/api';
-
+// All REST API calls route through the Next.js /api proxy.
+// This avoids CORS in both dev and production.
+// Sockets connect directly to the backend (separate config in lib/socket.ts).
 const api = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: '/api',
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
@@ -73,7 +68,7 @@ api.interceptors.response.use(
 
       try {
         const { data } = await axios.post(
-          `${API_BASE_URL}/auth/refresh-token`,
+          '/api/auth/refresh-token',
           {},
           { withCredentials: true }
         );
