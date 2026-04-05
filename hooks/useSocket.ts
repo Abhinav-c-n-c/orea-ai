@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useRef, useCallback } from 'react';
-import { connectSocket, disconnectSocket, getSocket, onConnectionChange, isNetworkOnline } from '../lib/socket';
+import { useEffect, useCallback } from 'react';
+import ws from '../lib/ws';
 import { useChatStore } from '../store/chatStore';
 import { useAuthStore } from '../store/authStore';
-import { getPendingMessages, removePendingMessage } from '../lib/offlineDb';
+import api from '../lib/axios';
 
 export const useSocket = () => {
   const { user } = useAuthStore();
@@ -16,150 +16,106 @@ export const useSocket = () => {
     removeTypingUser,
     fetchUnreadCount,
   } = useChatStore();
-  const initialized = useRef(false);
-
-  // Flush pending messages when back online
-  const flushPendingMessages = useCallback(async () => {
-    const socket = getSocket();
-    if (!socket?.connected) return;
-
-    try {
-      const pending = await getPendingMessages();
-      for (const msg of pending) {
-        socket.emit('message:send', {
-          receiverId: msg.receiverId,
-          content: msg.content,
-          messageType: msg.messageType,
-          mediaUrl: msg.mediaUrl,
-          encrypted: msg.encrypted,
-        });
-        await removePendingMessage(msg.id);
-      }
-    } catch (error) {
-      console.error('Failed to flush pending messages:', error);
-    }
-  }, []);
 
   useEffect(() => {
-    const token = localStorage.getItem('accessToken');
-    if (!token || !user || initialized.current) return;
+    const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+    if (!token || !user) return;
 
-    initialized.current = true;
-    const socket = connectSocket(token);
+    // Connect (no-op if already connected)
+    ws.connect(token);
 
-    socket.on('message:received', (message) => {
-      addMessage(message);
+    // ── Event handlers ──────────────────────────────────────────────────────
+    const offReceived = ws.on('message:received', (data) => {
+      addMessage(data as Parameters<typeof addMessage>[0]);
       fetchUnreadCount();
     });
-
-    socket.on('message:sent', (message) => {
-      addMessage(message);
+    const offSent = ws.on('message:sent', (data) => {
+      addMessage(data as Parameters<typeof addMessage>[0]);
     });
-
-    socket.on('message:delivered', ({ messageId }) => {
+    const offDelivered = ws.on('message:delivered', (data: unknown) => {
+      const { messageId } = data as { messageId: string };
       updateMessageStatus(messageId, 'delivered');
     });
-
-    socket.on('message:read:ack', ({ messageId }) => {
+    const offReadAck = ws.on('message:read:ack', (data: unknown) => {
+      const { messageId } = data as { messageId: string };
       updateMessageStatus(messageId, 'read');
     });
-
-    socket.on('messages:read:all:ack', ({ conversationId }) => {
+    const offReadAllAck = ws.on('messages:read:all:ack', (data: unknown) => {
+      const { conversationId } = data as { conversationId: string };
       useChatStore.getState().markAllReadByConversation(conversationId);
     });
-
-    socket.on('user:online', ({ onlineUsers }) => {
+    const offOnline = ws.on('user:online', (data: unknown) => {
+      const { onlineUsers } = data as { onlineUsers: { userId: string }[] };
       setOnlineUsers(onlineUsers);
     });
-
-    socket.on('user:offline', ({ onlineUsers }) => {
+    const offOffline = ws.on('user:offline', (data: unknown) => {
+      const { onlineUsers } = data as { onlineUsers: { userId: string }[] };
       setOnlineUsers(onlineUsers);
     });
-
-    socket.on('typing:start', ({ userId }) => {
+    const offTypingStart = ws.on('typing:start', (data: unknown) => {
+      const { userId } = data as { userId: string };
       addTypingUser(userId);
     });
-
-    socket.on('typing:stop', ({ userId }) => {
+    const offTypingStop = ws.on('typing:stop', (data: unknown) => {
+      const { userId } = data as { userId: string };
       removeTypingUser(userId);
     });
 
-    // Flush pending messages on connect
-    socket.on('connect', () => {
-      flushPendingMessages();
-    });
-
-    // Also listen for online/offline changes
-    const unsubscribe = onConnectionChange((online) => {
-      if (online) {
-        flushPendingMessages();
-      }
-    });
-
-    // Flush any existing pending messages on init
-    if (isNetworkOnline()) {
-      flushPendingMessages();
-    }
-
     return () => {
-      initialized.current = false;
-      unsubscribe();
-      disconnectSocket();
+      offReceived();
+      offSent();
+      offDelivered();
+      offReadAck();
+      offReadAllAck();
+      offOnline();
+      offOffline();
+      offTypingStart();
+      offTypingStop();
+      // Note: we do NOT call ws.disconnect() here — the socket should stay alive
+      // while the user is logged in, even when navigating between pages.
     };
   }, [user]);
 
-  const sendMessage = async (receiverId: string, content: string, messageType = 'text', mediaUrl?: string, encrypted?: boolean) => {
-    const socket = getSocket();
-    if (socket?.connected) {
-      // Use socket when connected (real-time)
-      socket.emit('message:send', { receiverId, content, messageType, mediaUrl, encrypted });
+  // ── Actions ─────────────────────────────────────────────────────────────────
+  const sendMessage = useCallback(async (
+    receiverId: string,
+    content: string,
+    messageType = 'text',
+    mediaUrl?: string,
+    encrypted?: boolean
+  ) => {
+    if (ws.connected) {
+      ws.send('message:send', { receiverId, content, messageType, mediaUrl, encrypted });
     } else {
-      // HTTP fallback when socket is not available (e.g. Vercel serverless)
+      // HTTP fallback when WebSocket is not connected
       try {
-        const { data } = await import('../lib/axios').then(m => m.default.post('/chat/send', {
-          receiverId,
-          content,
-          messageType,
-          mediaUrl,
-          encrypted,
-        }));
-        // Manually add message to local state so it appears immediately
+        const { data } = await api.post('/chat/send', {
+          receiverId, content, messageType, mediaUrl, encrypted,
+        });
         if (data?.data) {
           useChatStore.getState().addMessage(data.data);
         }
       } catch (err) {
-        console.error('Failed to send message via HTTP:', err);
+        console.error('Failed to send message:', err);
       }
     }
-  };
+  }, []);
 
-  const markAsRead = (messageId: string, senderId: string) => {
-    const socket = getSocket();
-    if (socket) {
-      socket.emit('message:read', { messageId, senderId });
-    }
-  };
+  const markAsRead = useCallback((messageId: string, senderId: string) => {
+    ws.send('message:read', { messageId, senderId });
+  }, []);
 
-  const markAllAsRead = (conversationId: string, senderId: string) => {
-    const socket = getSocket();
-    if (socket) {
-      socket.emit('messages:read:all', { conversationId, senderId });
-    }
-  };
+  const markAllAsRead = useCallback((conversationId: string, senderId: string) => {
+    ws.send('messages:read:all', { conversationId, senderId });
+  }, []);
 
-  const startTyping = (receiverId: string) => {
-    const socket = getSocket();
-    if (socket) {
-      socket.emit('typing:start', { receiverId });
-    }
-  };
+  const startTyping = useCallback((receiverId: string) => {
+    ws.send('typing:start', { receiverId });
+  }, []);
 
-  const stopTyping = (receiverId: string) => {
-    const socket = getSocket();
-    if (socket) {
-      socket.emit('typing:stop', { receiverId });
-    }
-  };
+  const stopTyping = useCallback((receiverId: string) => {
+    ws.send('typing:stop', { receiverId });
+  }, []);
 
-  return { sendMessage, markAsRead, markAllAsRead, startTyping, stopTyping, flushPendingMessages };
+  return { sendMessage, markAsRead, markAllAsRead, startTyping, stopTyping };
 };
