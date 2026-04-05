@@ -79,7 +79,8 @@ class WSManager {
         }
 
         if (type === 'auth:error' || type === 'auth:replaced') {
-          console.warn('WS auth issue:', type);
+          console.error('WS auth issue. Halting connection:', type);
+          this.disconnect(); // prevent endless reconnect loops
           return;
         }
 
