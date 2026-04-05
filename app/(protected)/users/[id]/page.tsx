@@ -2,13 +2,14 @@
 
 import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import Sidebar from '../../../components/Sidebar';
-import ProtectedLayout from '../../../components/ProtectedLayout';
-import Switch from '../../../components/Switch';
-import { useAuthStore } from '../../../store/authStore';
-import { getInitials } from '../../../utils/formatters';
-import api from '../../../lib/axios';
-import { IUser, IPermissions } from '../../../types';
+import Sidebar from '@/components/Sidebar';
+import Header from '@/components/Header';
+import Switch from '@/components/Switch';
+import { FiUsers, FiArrowLeft } from 'react-icons/fi';
+import { useAuthStore } from '@/store/authStore';
+import { getInitials } from '@/utils/formatters';
+import api from '@/lib/axios';
+import { IUser, IPermissions } from '@/types';
 
 export default function UserDetailPage() {
   const { id } = useParams();
@@ -90,148 +91,137 @@ export default function UserDetailPage() {
   const isMember = targetUser.role === 'member';
 
   return (
-    <ProtectedLayout>
-      <div className="flex min-h-screen bg-[#f8f9fc]">
-        <Sidebar />
-        <main className="flex-1 ml-[260px] p-8">
-          <div className="mb-8 flex items-center justify-between">
-            <div>
-              <button
-                onClick={() => router.back()}
-                className="text-primary-600 text-sm font-medium hover:underline mb-2 flex items-center gap-1"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 19l-7-7 7-7"
-                  />
-                </svg>
-                Back to Users
-              </button>
-              <h1 className="text-2xl font-bold text-surface-900">User Details</h1>
-            </div>
+    <main className="flex-1 p-6 overflow-y-auto bg-surface-50 dark:bg-slate-950 flex flex-col gap-6">
+      <Header 
+        title="User Details" 
+        subtitle={<span className="font-medium lowercase">Managing security clearance for <span className="text-primary-600 font-black uppercase text-xs">{targetUser.name}</span></span>}
+        icon={<FiUsers className="w-5 h-5" />}
+      >
+        <button
+          onClick={() => router.back()}
+          className="mr-2 px-4 py-2 border border-primary-100 dark:border-slate-700 rounded-xl text-sm font-black uppercase tracking-widest text-surface-600 dark:text-slate-400 hover:bg-primary-50 dark:hover:bg-slate-800 transition-all flex items-center gap-2"
+        >
+          <FiArrowLeft className="w-4 h-4" />
+          Back
+        </button>
 
-            <div className="flex gap-3">
-              {currentUser.role === 'super_admin' && !isSuperAdmin && (
-                <button
-                  onClick={() => handleRoleChange(isAdmin ? 'member' : 'admin')}
-                  disabled={isSaving}
-                  className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-                    isAdmin
-                      ? 'bg-red-50 text-red-700 hover:bg-red-100'
-                      : 'bg-primary-50 text-primary-700 hover:bg-primary-100'
-                  }`}
-                >
-                  {isAdmin ? 'Demote to Member' : 'Promote to Admin'}
-                </button>
-              )}
-              {currentUser.role === 'admin' && isMember && (
-                <button
-                  onClick={() => handleRoleChange('admin')}
-                  disabled={isSaving}
-                  className="px-4 py-2 bg-primary-50 text-primary-700 rounded-xl text-sm font-medium hover:bg-primary-100"
-                >
-                  Promote to Admin
-                </button>
-              )}
-            </div>
-          </div>
+        {currentUser.role === 'super_admin' && !isSuperAdmin && (
+          <button
+            onClick={() => handleRoleChange(isAdmin ? 'member' : 'admin')}
+            disabled={isSaving}
+            className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
+              isAdmin
+                ? 'bg-red-50 text-red-700 border border-red-100 hover:bg-red-100'
+                : 'bg-primary-50 text-primary-700 border border-primary-100 hover:bg-primary-100'
+            }`}
+          >
+            {isAdmin ? 'Demote to Member' : 'Promote to Admin'}
+          </button>
+        )}
+        {currentUser.role === 'admin' && isMember && (
+          <button
+            onClick={() => handleRoleChange('admin')}
+            disabled={isSaving}
+            className="px-4 py-2 bg-primary-50 text-primary-700 border border-primary-100 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-primary-100 transition-all"
+          >
+            Promote to Admin
+          </button>
+        )}
+      </Header>
 
-          {(message || error) && (
-            <div
-              className={`mb-6 p-4 rounded-xl text-sm ${
-                message
-                  ? 'bg-green-50 text-green-700 border border-green-100'
-                  : 'bg-red-50 text-red-700 border border-red-100'
+      {(message || error) && (
+        <div
+          className={`px-4 py-3 rounded-[4px] text-xs font-bold uppercase tracking-widest ${
+            message
+              ? 'bg-green-50 text-green-700 border border-green-100'
+              : 'bg-red-50 text-red-700 border border-red-100'
+          }`}
+        >
+          {message || error}
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left Column: Profile & Info */}
+        <div className="lg:col-span-1 space-y-6">
+          {/* Profile Card */}
+          <div className="bg-white dark:bg-slate-900 rounded-[4px] border border-primary-100 dark:border-slate-800 shadow-xl p-8 text-center transition-all duration-300">
+            <div className="w-24 h-24 mx-auto mb-6 rounded-[4px] bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white text-3xl font-black shadow-lg shadow-primary-500/20 transform hover:scale-105 transition-transform duration-300">
+              {getInitials(targetUser.name)}
+            </div>
+            <h3 className="font-black text-surface-900 dark:text-white text-xl uppercase tracking-tight">{targetUser.name}</h3>
+            <p className="text-xs font-bold text-surface-400 mb-6 lowercase tracking-tight">{targetUser.email}</p>
+            <span
+              className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border ${
+                isSuperAdmin
+                  ? 'bg-purple-50 text-purple-700 border-purple-100'
+                  : isAdmin
+                    ? 'bg-blue-50 text-blue-700 border-blue-100'
+                    : 'bg-green-50 text-green-700 border-green-100'
               }`}
             >
-              {message || error}
-            </div>
-          )}
+              {targetUser.role.replace('_', ' ')}
+            </span>
+          </div>
 
-          <div className="grid grid-cols-3 gap-8">
-            <div className="col-span-1 space-y-8">
-              {/* Profile Card */}
-              <div className="bg-white rounded-2xl border border-surface-100 shadow-card p-6 text-center">
-                <div className="w-24 h-24 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white text-3xl font-bold shadow-lg">
-                  {getInitials(targetUser.name)}
-                </div>
-                <h3 className="font-bold text-surface-900 text-xl">{targetUser.name}</h3>
-                <p className="text-sm text-surface-500 mb-4">{targetUser.email}</p>
-                <span
-                  className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
-                    isSuperAdmin
-                      ? 'bg-purple-100 text-purple-700'
-                      : isAdmin
-                        ? 'bg-blue-100 text-blue-700'
-                        : 'bg-green-100 text-green-700'
-                  }`}
-                >
-                  {targetUser.role.replace('_', ' ')}
+          {/* Status Section */}
+          <div className="bg-white dark:bg-slate-900 rounded-[4px] border border-primary-100 dark:border-slate-800 shadow-xl p-8">
+            <h4 className="font-black text-surface-900 dark:text-white mb-6 text-[10px] uppercase tracking-widest border-b border-primary-50 dark:border-slate-800 pb-2">Account Registry</h4>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <span className="text-[10px] font-black text-surface-400 uppercase tracking-widest">Enrolled on</span>
+                <span className="text-xs font-bold text-surface-900 dark:text-slate-300">
+                  {new Date(targetUser.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
                 </span>
               </div>
-
-              {/* Status Section */}
-              <div className="bg-white rounded-2xl border border-surface-100 shadow-card p-6">
-                <h4 className="font-bold text-surface-900 mb-4 text-sm">Account Information</h4>
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-xs text-surface-500">Member Since</span>
-                    <span className="text-xs font-medium text-surface-700">
-                      {new Date(targetUser.createdAt).toLocaleDateString()}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-xs text-surface-500">Account status</span>
-                    <span className="flex items-center gap-1.5 text-xs font-medium text-green-600">
-                      <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
-                      Active
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="col-span-2">
-              <div className="bg-white rounded-2xl border border-surface-100 shadow-card p-8">
-                <div className="flex items-center justify-between mb-8">
-                  <h3 className="font-bold text-surface-900">Manage Permissions</h3>
-                  {!canChangePermissions && (
-                    <span className="text-xs text-red-500 font-medium bg-red-50 px-2 py-1 rounded-lg">
-                      Read-only access
-                    </span>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-2 gap-x-12 gap-y-6">
-                  {Object.entries(targetUser.permissions).map(([key, value]) => (
-                    <div
-                      key={key}
-                      className="flex items-center justify-between pb-4 border-b border-surface-50 group"
-                    >
-                      <div>
-                        <span className="block text-sm font-semibold text-surface-800 capitalize group-hover:text-primary-600 transition-colors">
-                          {key.replace(/can|([A-Z])/g, (m, g) => (g ? ` ${g}` : '')).trim()}
-                        </span>
-                        <span className="text-[11px] text-surface-400">
-                          {value ? 'Currently enabled' : 'Currently disabled'}
-                        </span>
-                      </div>
-                      <Switch
-                        checked={value}
-                        onChange={(e) => handleTogglePermission(key, e.target.checked)}
-                        disabled={!canChangePermissions || isSaving}
-                      />
-                    </div>
-                  ))}
-                </div>
+              <div className="flex justify-between items-center">
+                <span className="text-[10px] font-black text-surface-400 uppercase tracking-widest">Operational Status</span>
+                <span className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-emerald-600">
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                  Active
+                </span>
               </div>
             </div>
           </div>
-        </main>
+        </div>
+
+        {/* Right Column: Permissions */}
+        <div className="lg:col-span-2">
+          <div className="bg-white dark:bg-slate-900 rounded-[4px] border border-primary-100 dark:border-slate-800 shadow-xl p-8 h-full">
+            <div className="flex items-center justify-between mb-8 border-b border-primary-50 dark:border-slate-800 pb-4">
+              <h3 className="font-black text-surface-900 dark:text-white uppercase tracking-tight text-lg">Access Protocols</h3>
+              {!canChangePermissions && (
+                <span className="text-[10px] font-black text-red-500 bg-red-50 border border-red-100 px-3 py-1 rounded-full uppercase tracking-widest">
+                  Read-Only Mode
+                </span>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
+              {Object.entries(targetUser.permissions).map(([key, value]) => (
+                <div
+                  key={key}
+                  className="flex items-center justify-between group"
+                >
+                  <div className="flex flex-col">
+                    <span className="text-[11px] font-black text-surface-900 dark:text-white uppercase tracking-widest group-hover:text-primary-600 transition-colors">
+                      {key.replace(/can|([A-Z])/g, (m, g) => (g ? ` ${g}` : '')).trim()}
+                    </span>
+                    <span className="text-[10px] text-surface-400 font-medium lowercase">
+                      {value ? 'Status: active' : 'Status: inactive'}
+                    </span>
+                  </div>
+                  <Switch
+                    checked={value}
+                    onChange={(e) => handleTogglePermission(key, e.target.checked)}
+                    disabled={!canChangePermissions || isSaving}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
-    </ProtectedLayout>
+    </main>
   );
 }

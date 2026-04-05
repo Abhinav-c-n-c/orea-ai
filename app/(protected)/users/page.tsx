@@ -3,11 +3,11 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { FiUsers, FiSearch } from 'react-icons/fi';
-import Header from '../../../components/Header';
-import { useAuthStore } from '../../../store/authStore';
-import { getInitials } from '../../../utils/formatters';
-import api from '../../../lib/axios';
-import { IUser } from '../../../types';
+import Header from '@/components/Header';
+import { useAuthStore } from '@/store/authStore';
+import { getInitials } from '@/utils/formatters';
+import api from '@/lib/axios';
+import { IUser } from '@/types';
 
 export default function UsersPage() {
   const { user } = useAuthStore();
