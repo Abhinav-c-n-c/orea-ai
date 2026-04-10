@@ -7,24 +7,30 @@
 const getWsUrl = (): string => {
   if (typeof window === 'undefined') return '';
 
-  // 1. Explicit environment variable always wins
+  // 1. If explicit WS URL is provided, use it
   if (process.env.NEXT_PUBLIC_WS_URL) {
     return process.env.NEXT_PUBLIC_WS_URL;
   }
 
-  // 2. Auto-detect protocol (wss for https, ws for http)
+  // 2. Derive from API URL if available
+  // If API is https://api.example.com/api, WS should be wss://api.example.com/ws
+  if (process.env.NEXT_PUBLIC_API_URL && process.env.NEXT_PUBLIC_API_URL.startsWith('http')) {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+    const wsUrl = apiUrl.replace(/^http/, 'ws').replace(/\/api$/, '') + '/ws';
+    return wsUrl;
+  }
+
+  // 3. Auto-detect protocol (wss for https, ws for http)
   const isHttps = window.location.protocol === 'https:';
   const protocol = isHttps ? 'wss:' : 'ws:';
   const host = window.location.host;
 
-  // 3. Special case for local development speed
-  // If we are on localhost and in dev mode, point to the dedicated backend port
+  // 4. Local development fallback (if no env vars)
   if (process.env.NODE_ENV === 'development' && window.location.hostname === 'localhost') {
     return 'ws://localhost:3900/ws';
   }
 
-  // 4. Default: Connect to the same host using the detected protocol
-  // This handles most deployments (Vercel, Railway, Heroku, etc.)
+  // 5. Last resort: use current host (works for unified deployments/proxies)
   return `${protocol}//${host}/ws`;
 };
 
