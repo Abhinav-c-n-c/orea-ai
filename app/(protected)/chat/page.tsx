@@ -314,8 +314,12 @@ export default function ChatPage() {
 
   const renderTicks = (msg: IMessage, isMine: boolean) => {
     if (!isMine) return null;
-    if (msg.read) return <><FiCheck className="inline w-3 h-3 text-primary-400 group-hover:text-primary-300" /><FiCheck className="inline w-3 h-3 -ml-1 text-primary-400" /></>;
-    return <FiCheck className="inline w-3 h-3 text-primary-300 opacity-50" />;
+    // Read: Two Green Ticks
+    if (msg.read) return <><FiCheck className="inline w-3 h-3 text-emerald-500 font-black" /><FiCheck className="inline w-3 h-3 -ml-1.5 text-emerald-500 font-black" /></>;
+    // Delivered: Two Gray Ticks
+    if (msg.delivered) return <><FiCheck className="inline w-3 h-3 text-surface-300 dark:text-slate-500 opacity-80" /><FiCheck className="inline w-3 h-3 -ml-1.5 text-surface-300 dark:text-slate-500 opacity-80" /></>;
+    // Sent: One Gray Tick
+    return <FiCheck className="inline w-3 h-3 text-surface-300 dark:text-slate-500 opacity-60" />;
   };
 
   const renderMedia = (msg: IMessage) => {

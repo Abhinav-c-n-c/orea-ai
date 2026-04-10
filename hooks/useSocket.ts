@@ -26,8 +26,21 @@ export const useSocket = () => {
 
     // ── Event handlers ──────────────────────────────────────────────────────
     const offReceived = ws.on('message:received', (data) => {
-      addMessage(data as Parameters<typeof addMessage>[0]);
-      fetchUnreadCount();
+      const msg = data as Parameters<typeof addMessage>[0];
+      const state = useChatStore.getState();
+      
+      addMessage(msg);
+      
+      if (state.activeConversation === msg.conversationId) {
+        // Automatically tell server we read it
+        ws.send('messages:read:all', { 
+          conversationId: msg.conversationId, 
+          senderId: typeof msg.sender === 'string' ? msg.sender : msg.sender._id 
+        });
+        useChatStore.getState().markAllReadByConversation(msg.conversationId);
+      } else {
+        fetchUnreadCount();
+      }
     });
     const offSent = ws.on('message:sent', (data) => {
       addMessage(data as Parameters<typeof addMessage>[0]);

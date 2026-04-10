@@ -6,7 +6,7 @@ interface ChatState {
   conversations: IConversation[];
   activeConversation: string | null;
   messages: IMessage[];
-  onlineUsers: Array<{ userId: string; email: string }>;
+  onlineUsers: Array<{ userId: string }>;
   unreadCount: number;
   isLoading: boolean;
   error: string | null;
@@ -16,7 +16,7 @@ interface ChatState {
   fetchMessages: (receiverId: string) => Promise<void>;
   addMessage: (message: IMessage) => void;
   setActiveConversation: (id: string | null) => void;
-  setOnlineUsers: (users: Array<{ userId: string; email: string }>) => void;
+  setOnlineUsers: (users: Array<{ userId: string }>) => void;
   updateMessageStatus: (messageId: string, status: 'delivered' | 'read') => void;
   markAllRead: (conversationId: string) => void;
   markAllReadByConversation: (conversationId: string) => void;

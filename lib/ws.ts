@@ -40,6 +40,9 @@ class WSManager {
 
   // ── Connect ────────────────────────────────────────────────────────────────
   connect(token: string): void {
+    if (this.token === token && this.ws && (this.ws.readyState === WebSocket.CONNECTING || this.ws.readyState === WebSocket.OPEN)) {
+      return; // Already connected or connecting with the same token
+    }
     this.token = token;
     this.destroyed = false;
     this._openSocket();
