@@ -7,18 +7,25 @@
 const getWsUrl = (): string => {
   if (typeof window === 'undefined') return '';
 
+  // 1. Explicit environment variable always wins
   if (process.env.NEXT_PUBLIC_WS_URL) {
     return process.env.NEXT_PUBLIC_WS_URL;
   }
 
-  // Auto-detect: dev → localhost:3900, prod → same origin with wss
-  if (process.env.NODE_ENV === 'development') {
+  // 2. Auto-detect protocol (wss for https, ws for http)
+  const isHttps = window.location.protocol === 'https:';
+  const protocol = isHttps ? 'wss:' : 'ws:';
+  const host = window.location.host;
+
+  // 3. Special case for local development speed
+  // If we are on localhost and in dev mode, point to the dedicated backend port
+  if (process.env.NODE_ENV === 'development' && window.location.hostname === 'localhost') {
     return 'ws://localhost:3900/ws';
   }
 
-  // Production fallback: use same origin (works if behind a reverse proxy)
-  const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-  return `${proto}//${window.location.host}/ws`;
+  // 4. Default: Connect to the same host using the detected protocol
+  // This handles most deployments (Vercel, Railway, Heroku, etc.)
+  return `${protocol}//${host}/ws`;
 };
 
 // ── Types ─────────────────────────────────────────────────────────────────────
