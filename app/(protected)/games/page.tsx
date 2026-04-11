@@ -33,7 +33,7 @@ export default function GamesLobby() {
     e.preventDefault();
     if (!joinCode.trim()) return;
     try {
-      const room = await joinRoom(joinCode.trim());
+      const room = await joinRoom(joinCode.trim().toUpperCase());
       router.push(`/games/${room.type}/${room.roomId}`);
     } catch (err) {
       alert('Invalid room or failed to join');
@@ -112,8 +112,8 @@ export default function GamesLobby() {
                 type="text"
                 placeholder="SESSION CODE"
                 value={joinCode}
-                onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
-                className="px-5 py-2.5 rounded-[4px] bg-white/10 border border-white/20 outline-none focus:border-primary-400 transition-all text-white font-mono text-base uppercase tracking-[0.3em] w-full sm:w-60 placeholder:text-white/30 text-center sm:text-left"
+                onChange={(e) => setJoinCode(e.target.value)}
+                className="px-6 py-3.5 rounded-[4px] bg-white/5 border border-white/10 outline-none focus:border-primary-400 focus:bg-white/10 focus:ring-4 focus:ring-primary-500/20 transition-all text-white font-mono text-xl sm:text-2xl uppercase tracking-[0.4em] w-full sm:w-72 placeholder:text-white/20 text-center shadow-inner"
                 maxLength={8}
               />
               <button

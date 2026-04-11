@@ -87,10 +87,16 @@ export default function TicTacToePage() {
         <button onClick={() => router.push('/games')} className="flex items-center gap-2 text-surface-600 dark:text-slate-300 hover:text-primary-600 font-medium transition-colors">
           <FiArrowLeft /> Leave Game
         </button>
-        <div className="flex bg-surface-100 dark:bg-slate-700 rounded-lg overflow-hidden">
-          <div className="px-4 py-2 text-sm font-mono font-bold dark:text-white">Room: {currentRoom.roomId}</div>
-          <button onClick={copyRoomId} className="px-3 py-2 bg-primary-100 hover:bg-primary-200 text-primary-700 transition-colors flex items-center gap-1 text-xs font-bold uppercase">
-            {copied ? 'Copied!' : <><FiCopy /> Copy</>}
+        <div className="flex items-center bg-slate-100 dark:bg-slate-700/50 rounded-[4px] border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm">
+          <div className="px-5 py-2 text-sm md:text-base font-mono font-black text-slate-900 dark:text-white uppercase tracking-wider border-r border-slate-200 dark:border-slate-700">
+            <span className="text-[10px] text-slate-400 dark:text-slate-500 mr-2 uppercase tracking-normal font-bold">Room:</span>
+            {currentRoom.roomId.toUpperCase()}
+          </div>
+          <button 
+            onClick={copyRoomId} 
+            className="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white transition-all flex items-center gap-2 text-[10px] font-black uppercase tracking-widest active:scale-95 shadow-inner"
+          >
+            {copied ? 'Copied!' : <><FiCopy className="w-3" /> Copy</>}
           </button>
         </div>
       </div>
