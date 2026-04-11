@@ -38,9 +38,7 @@ export default function Header({ title, subtitle, icon, children }: HeaderProps)
         {/* LOGO / ICON BOX */}
         <div className="w-10 h-10 rounded-[4px] bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center shadow-lg shadow-primary-500/20 flex-shrink-0">
           {icon ? (
-            <div className="text-white w-5 h-5 flex items-center justify-center">
-              {icon}
-            </div>
+            <div className="text-white w-5 h-5 flex items-center justify-center">{icon}</div>
           ) : (
             <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
               <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
@@ -52,7 +50,9 @@ export default function Header({ title, subtitle, icon, children }: HeaderProps)
             {title}
           </div>
           {subtitle && (
-            <p className="text-surface-500 dark:text-slate-400 text-sm mt-0.5 hidden sm:block">{subtitle}</p>
+            <p className="text-surface-500 dark:text-slate-400 text-sm mt-0.5 hidden sm:block">
+              {subtitle}
+            </p>
           )}
         </div>
       </div>
@@ -63,7 +63,7 @@ export default function Header({ title, subtitle, icon, children }: HeaderProps)
         {/* Logout Button */}
         <button
           onClick={handleLogout}
-          className="flex items-center gap-2 px-3 md:px-4 py-2 rounded-xl bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors font-medium text-sm"
+          className="flex items-center gap-2 px-3 md:px-4 py-2 rounded bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors font-medium text-sm"
         >
           <FiLogOut className="w-4 h-4" />
           <span className="hidden sm:inline">Logout</span>
