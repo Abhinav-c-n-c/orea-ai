@@ -481,12 +481,26 @@ export default function ChatPage() {
                           <span className="text-[10px] font-black text-surface-400 uppercase tracking-[0.2em]">{formatChatDate(msg.createdAt)}</span>
                         </div>
                       )}
-                      <div className={`flex ${isMine ? 'justify-end' : 'justify-start'} group mb-2`}>
-                        <div className={`max-w-[70%] ${isMine ? 'bg-primary-600 text-white rounded-[20px] rounded-br-none shadow-lg shadow-primary-600/20' : 'bg-white dark:bg-slate-800 text-surface-900 dark:text-white rounded-[20px] rounded-bl-none shadow-sm border border-primary-50 dark:border-slate-700'} px-5 py-3 text-sm`}>
+                      <div className={`flex items-end gap-2 ${isMine ? 'flex-row-reverse self-end' : 'flex-row self-start'} group mb-4`}>
+                        {/* Avatar Layer */}
+                        <div className="flex-shrink-0 mb-1">
+                          <div className={`w-7 h-7 rounded-[4px] flex items-center justify-center text-[10px] font-extrabold shadow-sm border ${isMine ? 'bg-primary-600 text-white border-primary-500' : 'bg-white dark:bg-slate-800 text-primary-600 border-primary-50 dark:border-slate-700'}`}>
+                            {isMine ? (
+                              user?.avatar ? <img src={user.avatar} className="w-full h-full object-cover rounded-[4px]" alt="" /> : getInitials(user?.name || '')
+                            ) : (
+                              selectedUser?.avatar ? <img src={selectedUser.avatar} className="w-full h-full object-cover rounded-[4px]" alt="" /> : getInitials(selectedUser?.name || '')
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Message Bubble Layer */}
+                        <div className={`max-w-[75%] ${isMine ? 'bg-primary-600 text-white rounded-[16px] rounded-br-none shadow-lg shadow-primary-600/10' : 'bg-white dark:bg-slate-800 text-surface-900 dark:text-white rounded-[16px] rounded-bl-none shadow-sm border border-primary-50 dark:border-slate-700'} px-4 py-2.5 text-sm transition-all group-hover:shadow-md`}>
                           {renderMedia(msg)}
                           {msg.messageType !== 'file' && <p className="leading-relaxed font-medium">{getMessageContent(msg)}</p>}
-                          <div className={`flex justify-end items-center gap-1.5 mt-1.5 opacity-70`}>
-                            <span className="text-[9px] font-bold uppercase">{new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                          <div className={`flex justify-end items-center gap-1.5 mt-1 opacity-60`}>
+                            <span className="text-[8px] font-black uppercase tracking-tighter">
+                              {new Date(msg.createdAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })}
+                            </span>
                             {renderTicks(msg, isMine)}
                           </div>
                         </div>

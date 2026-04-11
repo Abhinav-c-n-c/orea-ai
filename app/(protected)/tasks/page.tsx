@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   DndContext,
   closestCorners,
@@ -9,6 +10,7 @@ import {
   useSensor,
   useSensors,
   DragEndEvent,
+  useDroppable,
 } from '@dnd-kit/core';
 import {
   SortableContext,
@@ -49,21 +51,164 @@ const CLOUD_NAME = 'dybv5ghlb';
 const taskColumns = [
   { 
     id: 'todos', 
-    label: 'TODOs', 
-    description: 'Ongoing and upcoming tasks to handle.',
+    label: 'Mission Backlog', 
+    description: 'Ongoing and upcoming operational tasks.',
     color: 'bg-primary-500', 
-    bgColor: 'bg-slate-50 dark:bg-slate-800', 
+    bgColor: 'bg-white dark:bg-slate-900', 
     statuses: ['to_discuss', 'todo', 'in_progress'] as TaskStatus[] 
   },
   { 
     id: 'done', 
-    label: 'Done', 
-    description: 'Tasks that have been successfully completed.',
+    label: 'Completed Archives', 
+    description: 'Tasks successfully archived and finalized.',
     color: 'bg-emerald-500', 
-    bgColor: 'bg-emerald-50 dark:bg-emerald-900/10', 
+    bgColor: 'bg-white dark:bg-slate-900', 
     statuses: ['done'] as TaskStatus[] 
   },
 ];
+
+const EmojiBurst = ({ active }: { active: boolean }) => {
+  if (!active) return null;
+  const emojis = ['🎉', '🚀', '🔥', '✅', '🏆', '🎊', '✨'];
+  return (
+    <div className="fixed inset-0 pointer-events-none z-[100] flex items-center justify-center">
+      {Array.from({ length: 20 }).map((_, i) => (
+        <motion.div
+          key={i}
+          initial={{ x: 0, y: 0, scale: 0, opacity: 1 }}
+          animate={{ 
+            x: (Math.random() - 0.5) * 600, 
+            y: (Math.random() - 0.5) * 600, 
+            scale: [0, 1.5, 0],
+            rotate: Math.random() * 360,
+            opacity: [1, 1, 0]
+          }}
+          transition={{ duration: 1.2, ease: "easeOut" }}
+          className="absolute text-4xl"
+        >
+          {emojis[Math.floor(Math.random() * emojis.length)]}
+        </motion.div>
+      ))}
+    </div>
+  );
+};
+
+const OhSitAlert = ({ active }: { active: boolean }) => {
+  return (
+    <AnimatePresence>
+      {active && (
+        <motion.div
+          initial={{ y: 50, opacity: 0, scale: 0.5 }}
+          animate={{ y: 0, opacity: 1, scale: 1 }}
+          exit={{ y: -50, opacity: 0, scale: 0.5 }}
+          className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[100] bg-amber-500 text-white px-6 py-3 rounded-full font-black uppercase tracking-widest shadow-2xl flex items-center gap-3"
+        >
+          <span className="text-2xl">😮</span> Oh sit! Mission regressed
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
+
+const ColumnContainer = ({ 
+  col, 
+  columnTasks, 
+  tasksLoading, 
+  index, 
+  setSelectedTask, 
+  setShowDetailModal, 
+  setNewTaskStatus, 
+  setShowCreateTask 
+}: any) => {
+  const { setNodeRef } = useDroppable({ id: col.id });
+
+  return (
+    <React.Fragment>
+      <div
+        ref={setNodeRef}
+        className={`flex-1 flex flex-col rounded-[2px] shadow-sm ${col.bgColor} p-4 md:p-6 my-2 md:my-4 transition-all duration-300 border border-slate-200 dark:border-slate-800 hover:shadow-xl hover:shadow-primary-600/5 group/column`}
+      >
+        <div className="flex items-start justify-between mb-4 md:mb-6 px-1">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <div className={`w-2 h-2 rounded-full shadow-sm animate-pulse ${col.id === 'done' ? 'bg-emerald-500' : 'bg-primary-500'}`}></div>
+              <h3 className="font-black text-surface-900 dark:text-white text-sm uppercase tracking-widest group-hover/column:text-primary-600 transition-colors">
+                {col.label}
+              </h3>
+              <div className="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-[10px] font-black shadow-sm text-surface-500 dark:text-slate-400 ml-1">
+                {columnTasks.length}
+              </div>
+            </div>
+            <p className="text-[10px] text-surface-400 dark:text-slate-500 font-bold uppercase tracking-tighter">
+              {col.description}
+            </p>
+          </div>
+          <button
+            onClick={() => {
+              setNewTaskStatus(col.statuses[0]);
+              setShowCreateTask(true);
+            }}
+            className="flex items-center gap-2 px-3 py-1.5 rounded bg-slate-50 dark:bg-slate-800 text-primary-600 dark:text-primary-400 hover:bg-primary-600 hover:text-white transition-all shadow-sm border border-slate-200 dark:border-slate-700 text-[10px] font-black uppercase tracking-widest group/add"
+            title="Add Task"
+          >
+            <FiPlus className="w-4 h-4 transition-transform group-hover/add:rotate-90" />
+            <span className="hidden sm:inline">Add Card</span>
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto space-y-4 px-1 custom-scrollbar">
+          <SortableContext
+            items={columnTasks.map((t: any) => t._id)}
+            strategy={verticalListSortingStrategy}
+            id={col.id}
+          >
+            <div className="space-y-4">
+              {columnTasks.map((task: any) => (
+                <TaskCard
+                  key={task._id}
+                  task={task}
+                  onClick={() => {
+                    setSelectedTask(task);
+                    setShowDetailModal(true);
+                  }}
+                />
+              ))}
+            </div>
+          </SortableContext>
+          {columnTasks.length === 0 && !tasksLoading && (
+            <div className="h-full flex flex-col items-center justify-center py-12 text-center animate-fade-in px-4">
+              <div className="w-16 h-16 bg-slate-50 dark:bg-slate-800 rounded-full shadow-inner flex items-center justify-center mx-auto mb-6 opacity-40">
+                {col.id === 'todos' ? (
+                  <FiEdit3 className="w-8 h-8 text-slate-400" />
+                ) : (
+                  <FiCheckSquare className="w-8 h-8 text-slate-400" />
+                )}
+              </div>
+              <h4 className="text-surface-900 dark:text-white font-black text-xs uppercase tracking-widest mb-2">
+                {col.id === 'todos' ? "Backlog Empty" : "Archive Pending"}
+              </h4>
+              <p className="text-[10px] text-surface-400 dark:text-slate-500 font-bold uppercase tracking-tighter leading-relaxed max-w-[200px]">
+                {col.id === 'todos' 
+                  ? "Awaiting operational data input." 
+                  : "Completed objectives will appear here."}
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+      {/* Visual Bridge */}
+      {index === 0 && (
+        <div className="hidden xl:flex flex-col items-center justify-center py-12 px-2 shrink-0">
+          <div className="h-20 w-px bg-slate-200 dark:bg-slate-800"></div>
+          <div className="w-8 h-8 rounded-full bg-slate-50 dark:bg-slate-900 shadow-inner border border-slate-200 dark:border-slate-800 flex items-center justify-center my-4">
+            <FiZap className="w-4 h-4 text-primary-500 animate-pulse" />
+          </div>
+          <div className="h-full w-px bg-slate-200 dark:bg-slate-800"></div>
+        </div>
+      )}
+    </React.Fragment>
+  );
+};
 
 export default function TasksPage() {
   const {
@@ -97,6 +242,8 @@ export default function TasksPage() {
   const [showMentionList, setShowMentionList] = useState(false);
   const [mentionFilter, setMentionFilter] = useState('');
   const [mentionedUserIds, setMentionedUserIds] = useState<string[]>([]);
+  const [showBurst, setShowBurst] = useState(false);
+  const [showOhSit, setShowOhSit] = useState(false);
 
 
 
@@ -157,6 +304,13 @@ export default function TasksPage() {
       const task = tasks.find((t) => t._id === taskId);
       if (task && task.status !== newStatus) {
         try {
+          if (newStatus === 'done' && task.status !== 'done') {
+            setShowBurst(true);
+            setTimeout(() => setShowBurst(false), 2000);
+          } else if (task.status === 'done' && newStatus !== 'done') {
+            setShowOhSit(true);
+            setTimeout(() => setShowOhSit(false), 2000);
+          }
           await updateTask(taskId, { status: newStatus });
         } catch (error) {
           console.error('Failed to update task status:', error);
@@ -314,7 +468,10 @@ export default function TasksPage() {
   const hasActiveFilters = filterPriority !== 'all' || filterAssignee !== 'all' || filterTag !== 'all' || filterDueDate !== 'all';
 
   return (
-    <main className="flex-1 flex flex-col h-full overflow-hidden bg-surface-50 dark:bg-slate-950 p-6 gap-6">
+    <main className="flex-1 flex flex-col h-full overflow-hidden bg-slate-50 dark:bg-slate-950 p-6 gap-6 relative">
+      <EmojiBurst active={showBurst} />
+      <OhSitAlert active={showOhSit} />
+
       {/* Header */}
           <Header
             title={
@@ -326,8 +483,8 @@ export default function TasksPage() {
                 <FiChevronDown className="w-4 h-4 text-surface-400" />
               </button>
             }
-            subtitle="Organize and track your board tasks"
-            icon={<FiCheckSquare className="w-5 h-5" />}
+            subtitle="Secure Archive Management Protocol"
+            icon={<FiCheckSquare className="w-5 h-5 text-white" />}
           >
             {/* Search */}
             <div className="relative hidden sm:block">
@@ -445,114 +602,31 @@ export default function TasksPage() {
           )}
 
           {/* 2-Column Kanban Board */}
-          <div className="flex-1 flex gap-6 min-h-0 pb-4 overflow-x-auto custom-scrollbar">
-            <DndContext
-              sensors={sensors}
-              collisionDetection={closestCorners}
-              onDragEnd={handleDragEnd}
-            >
-              {taskColumns.map((col, index) => {
-                const columnTasks = getTasksByColumn(col);
-                return (
-                  <React.Fragment key={col.id}>
-                    <div
-                      className={`flex-1 max-w-[480px] min-w-[320px] flex flex-col rounded-[4px] shadow-2xl ${col.bgColor} p-4 md:p-6 my-2 md:my-4 transition-all duration-300 border border-surface-200 dark:border-slate-700/50 hover:shadow-primary-500/10 hover:-translate-y-1 group/column`}
-                    >
-                      <div className="flex items-start justify-between mb-4 md:mb-6 px-1">
-                        <div>
-                          <div className="flex items-center gap-2 mb-1">
-                            <div className={`w-2.5 h-2.5 rounded-full shadow-sm animate-pulse ${col.id === 'done' ? 'bg-emerald-500' : 'bg-primary-500'}`}></div>
-                            <h3 className="font-bold text-surface-900 dark:text-white text-lg tracking-tight group-hover/column:text-primary-600 dark:group-hover/column:text-primary-400 transition-colors">
-                              {col.label}
-                            </h3>
-                            <div className="w-6 h-6 rounded-full bg-white dark:bg-slate-900/50 flex items-center justify-center text-[10px] font-bold shadow-sm text-surface-600 dark:text-slate-300 ml-1">
-                              {columnTasks.length}
-                            </div>
-                          </div>
-                          <p className="text-xs text-surface-500 dark:text-slate-400 font-medium">
-                            {col.description}
-                          </p>
-                        </div>
-                        <button
-                          onClick={() => {
-                            setNewTaskStatus(col.statuses[0]);
-                            setShowCreateTask(true);
-                          }}
-                          className="flex items-center gap-2 px-3 py-1.5 rounded bg-white dark:bg-slate-700/50 text-primary-600 dark:text-primary-400 hover:bg-primary-600 hover:text-white transition-all shadow-sm border border-primary-100/50 dark:border-primary-900/20 text-[10px] font-bold uppercase tracking-wider group/add"
-                          title="Add Task"
-                        >
-                          <FiPlus className="w-4 h-4 transition-transform group-hover/add:rotate-90" />
-                          <span className="hidden sm:inline">Add Card</span>
-                        </button>
-                      </div>
-
-                      <div className="flex-1 overflow-y-auto space-y-3 px-1 custom-scrollbar">
-                      <SortableContext
-                        items={columnTasks.map((t) => t._id)}
-                        strategy={verticalListSortingStrategy}
-                        id={col.id}
-                      >
-                        {columnTasks.map((task) => (
-                          <TaskCard
-                            key={task._id}
-                            task={task}
-                            onClick={() => {
-                              setSelectedTask(task);
-                              setShowDetailModal(true);
-                            }}
-                          />
-                        ))}
-                      </SortableContext>
-                      {columnTasks.length === 0 && !tasksLoading && (
-                        <div className="h-full flex flex-col items-center justify-center py-12 text-center animate-fade-in px-4">
-                          <div className="w-16 h-16 bg-white dark:bg-slate-800 rounded-full shadow-xl flex items-center justify-center mx-auto mb-6 transform transition-transform hover:rotate-12">
-                            {col.id === 'todos' ? (
-                              <FiEdit3 className="w-8 h-8 text-primary-500" />
-                            ) : (
-                              <FiCheckSquare className="w-8 h-8 text-emerald-500" />
-                            )}
-                          </div>
-                          <h4 className="text-surface-900 dark:text-white font-bold mb-2">
-                            {col.id === 'todos' ? "Your board is empty" : "No results yet"}
-                          </h4>
-                          <p className="text-xs text-surface-500 dark:text-slate-400 font-medium max-w-[200px] leading-relaxed">
-                            {col.id === 'todos' 
-                              ? "Hey, what's on your mind today? Add your first task and let's get started!" 
-                              : "Get things done to see them here. Let's finish something today!"}
-                          </p>
-                          {col.id === 'todos' && (
-                            <button
-                              onClick={() => {
-                                setNewTaskStatus('todo');
-                                setShowCreateTask(true);
-                              }}
-                              className="mt-6 px-5 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded font-bold text-xs shadow-lg shadow-primary-500/30 transition-all active:scale-95"
-                            >
-                              Add First Task
-                            </button>
-                          )}
-                        </div>
-                      )}
-                      {tasksLoading && (
-                        <div className="skeleton rounded-2xl h-40 w-full opacity-50"></div>
-                      )}
-                    </div>
-                    </div>
-                    {/* Visual Bridge / Divider between columns */}
-                    {index === 0 && (
-                      <div className="hidden xl:flex flex-col items-center justify-center py-12 px-2">
-                        <div className="h-full w-px bg-gradient-to-b from-transparent via-primary-300/30 to-transparent"></div>
-                        <div className="w-10 h-10 rounded-full bg-white dark:bg-slate-800 shadow-xl border border-primary-100 dark:border-slate-700 flex items-center justify-center my-4 relative">
-                          <div className="absolute inset-0 rounded-full bg-primary-400 animate-ping opacity-20"></div>
-                          <FiZap className="w-5 h-5 text-primary-500 relative z-10" />
-                        </div>
-                        <div className="h-full w-px bg-gradient-to-b from-transparent via-primary-300/30 to-transparent"></div>
-                      </div>
-                    )}
-                  </React.Fragment>
-                );
-              })}
-            </DndContext>
+          <div className="flex-1 flex justify-center min-h-0 pb-4 overflow-x-auto custom-scrollbar">
+            <div className="flex w-full max-w-7xl gap-6 px-4">
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCorners}
+                onDragEnd={handleDragEnd}
+              >
+                {taskColumns.map((col, index) => {
+                  const columnTasks = getTasksByColumn(col);
+                  return (
+                    <ColumnContainer
+                      key={col.id}
+                      col={col}
+                      columnTasks={columnTasks}
+                      tasksLoading={tasksLoading}
+                      index={index}
+                      setSelectedTask={setSelectedTask}
+                      setShowDetailModal={setShowDetailModal}
+                      setNewTaskStatus={setNewTaskStatus}
+                      setShowCreateTask={setShowCreateTask}
+                    />
+                  );
+                })}
+              </DndContext>
+            </div>
           </div>
 
 
@@ -769,95 +843,133 @@ export default function TasksPage() {
         )}
 
         {/* Task Detail Popup Modal */}
-        {showDetailModal && selectedTask && (
-          <div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fade-in"
-            onClick={() => setShowDetailModal(false)}
-          >
-            <div
-              className="bg-white dark:bg-slate-800 w-full max-w-4xl max-h-[90vh] rounded-[4px] shadow-2xl overflow-hidden flex flex-col border border-primary-100 dark:border-slate-700 animate-scale-in"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Cover Image */}
-              {selectedTask.images && selectedTask.images.length > 0 && (
-                <div className="w-full h-[240px] relative shrink-0">
-                  <img 
-                    src={selectedTask.images[0]} 
-                    alt="Task Cover" 
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-                  <div className="absolute bottom-6 left-6 right-6">
-                    <h2 className="text-3xl font-black text-white leading-tight drop-shadow-lg">
-                      {selectedTask.title}
-                    </h2>
-                  </div>
-                </div>
-              )}
-
-              {/* Modal Header */}
-              <div className="flex items-center justify-between px-6 py-4 border-b border-primary-50 dark:border-slate-700 bg-surface-50/30 dark:bg-slate-800/50">
-                {!selectedTask.images?.length && (
-                  <h2 className="text-xl font-bold text-surface-900 dark:text-white truncate pr-4">
-                    {selectedTask.title}
-                  </h2>
-                )}
-                <div className="flex items-center gap-3 ml-auto">
-                  <button
-                    onClick={async () => {
-                      if (confirm('Delete this task?')) {
-                        await deleteTask(selectedTask._id);
-                        setShowDetailModal(false);
-                      }
-                    }}
-                    className="p-2 hover:bg-red-50 dark:hover:bg-red-500/10 text-surface-400 hover:text-red-500 rounded transition-colors"
-                  >
-                    <FiTrash2 className="w-5 h-5" />
-                  </button>
-                  <button
-                    onClick={() => setShowDetailModal(false)}
-                    className="p-2 hover:bg-surface-100 dark:hover:bg-slate-700 text-surface-400 rounded transition-colors"
-                  >
-                    <FiX className="w-6 h-6" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Modal Content - Scrollable */}
-              <div className="flex-1 overflow-y-auto custom-scrollbar">
-                <div className="flex flex-col md:flex-row h-full">
-                  
-                  {/* Left Column - Main Content */}
-                  <div className="flex-1 p-6 md:p-8 space-y-8 border-r border-primary-50 dark:border-slate-700/50">
-                    <div>
-                      <span className="text-[10px] font-bold text-primary-500 uppercase tracking-widest mb-4 block">Description</span>
-                      <p className="text-surface-600 dark:text-slate-300 text-sm leading-relaxed whitespace-pre-wrap">
-                        {selectedTask.description || 'No description provided.'}
-                      </p>
-                    </div>
-
-                    {/* Comments Section */}
-                    <div className="pt-6 border-t border-primary-50 dark:border-slate-700">
-                      <h4 className="text-sm font-bold dark:text-white mb-6 flex items-center gap-2">
-                        <FiMessageCircle className="w-4 h-4 text-primary-500" />
-                        Activity & Comments
-                        <span className="text-[10px] font-bold bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-300 px-2 py-0.5 rounded">
-                          {selectedTask.comments.length}
+        <AnimatePresence>
+          {showDetailModal && selectedTask && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 bg-black/60 backdrop-blur-[2px]"
+                onClick={() => setShowDetailModal(false)}
+              />
+              
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                className="bg-white dark:bg-slate-900 w-full max-w-5xl max-h-[90vh] rounded-[2px] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.5)] overflow-hidden flex flex-col border border-slate-200 dark:border-slate-800 z-50 relative"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Header Section with optional cover image */}
+                {selectedTask.images && selectedTask.images.length > 0 ? (
+                  <div className="w-full h-[180px] relative shrink-0">
+                    <img 
+                      src={selectedTask.images[0]} 
+                      alt="Task Cover" 
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent"></div>
+                    <div className="absolute bottom-4 left-6 right-6">
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className={`px-2 py-0.5 rounded-[2px] text-[10px] font-black uppercase tracking-widest bg-primary-500 text-white`}>
+                          MISSION ID: {selectedTask._id.substring(0, 8).toUpperCase()}
                         </span>
-                      </h4>
+                      </div>
+                      <h2 className="text-xl font-black text-white leading-tight uppercase tracking-tight">
+                        {selectedTask.title}
+                      </h2>
+                    </div>
+                    {/* Floating Controls */}
+                    <div className="absolute top-4 right-4 flex items-center gap-1.5">
+                       <button
+                        onClick={async () => {
+                          if (confirm('Verify: Permanent record deletion?')) {
+                            await deleteTask(selectedTask._id);
+                            setShowDetailModal(false);
+                          }
+                        }}
+                        className="p-2 bg-white/10 hover:bg-red-500 backdrop-blur-md text-white rounded-[2px] transition-all border border-white/10"
+                      >
+                        <FiTrash2 className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => setShowDetailModal(false)}
+                        className="p-2 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white rounded-[2px] transition-all border border-white/10"
+                      >
+                        <FiX className="w-5 h-5" />
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
+                    <div>
+                      <span className="text-[9px] font-black text-primary-500 uppercase tracking-widest mb-0.5 block">Operational Metadata Alpha</span>
+                      <h2 className="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight">
+                        {selectedTask.title}
+                      </h2>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={async () => {
+                          if (confirm('Verify: Permanent record deletion?')) {
+                            await deleteTask(selectedTask._id);
+                            setShowDetailModal(false);
+                          }
+                        }}
+                        className="p-2 hover:bg-red-50 dark:hover:bg-red-500/10 text-slate-400 hover:text-red-500 rounded transition-colors"
+                      >
+                        <FiTrash2 className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => setShowDetailModal(false)}
+                        className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 rounded transition-colors"
+                      >
+                        <FiX className="w-5 h-5" />
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
+                  {/* Left Column - Tactical Intel (70%) */}
+                  <div className="flex-[7] overflow-y-auto custom-scrollbar p-4 md:p-6 space-y-5 border-r border-slate-100 dark:border-slate-800">
+                    <section>
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="w-1.5 h-4 bg-primary-500"></div>
+                        <h4 className="text-[10px] font-black text-slate-900 dark:text-white uppercase tracking-[0.2em]">Operational Briefing</h4>
+                      </div>
+                      <div className="bg-slate-50 dark:bg-slate-800/40 p-4 rounded-[2px] border border-slate-100 dark:border-slate-800/50">
+                        <p className="text-slate-600 dark:text-slate-400 text-xs leading-relaxed whitespace-pre-wrap font-medium">
+                          {selectedTask.description || 'No tactical intel provided for this mission.'}
+                        </p>
+                      </div>
+                    </section>
+
+                    <section className="pt-6 border-t border-slate-100 dark:border-slate-800">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-1.5 h-4 bg-primary-500"></div>
+                          <h4 className="text-[10px] font-black text-slate-900 dark:text-white uppercase tracking-[0.2em]">Activity Feed</h4>
+                        </div>
+                        <span className="text-[9px] font-black bg-primary-500 text-white px-2 py-0.5 rounded-[2px] tracking-widest">
+                          {selectedTask.comments.length} LOGS
+                        </span>
+                      </div>
                       
-                      <div className="space-y-6 mb-8">
+                      <div className="space-y-4 mb-6">
                         {selectedTask.comments.map((c, i) => (
-                          <div key={i} className="flex gap-4">
-                            <div className="w-8 h-8 rounded bg-primary-100 dark:bg-primary-900/30 flex-shrink-0 flex items-center justify-center font-bold text-primary-600 dark:text-primary-400 text-xs">
+                          <div key={i} className="flex gap-3 group">
+                            <div className="w-8 h-8 rounded-[2px] bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex-shrink-0 flex items-center justify-center font-black text-primary-500 text-[10px] shadow-sm">
                               {getInitials(c.user?.name || 'U')}
                             </div>
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-1">
-                                <span className="text-xs font-bold text-surface-900 dark:text-white">{c.user?.name}</span>
-                                <span className="text-[10px] font-medium text-surface-400 dark:text-slate-500">• {timeAgo(c.createdAt)}</span>
+                            <div className="flex-1 space-y-1.5">
+                              <div className="flex items-center gap-2">
+                                <span className="text-[10px] font-black text-slate-900 dark:text-white uppercase tracking-wider">{c.user?.name}</span>
+                                <span className="text-[8px] font-bold text-slate-400 dark:text-slate-600 uppercase tracking-tighter">• {timeAgo(c.createdAt)}</span>
                               </div>
-                              <div className="bg-surface-50 dark:bg-slate-700/50 rounded p-3 text-xs text-surface-600 dark:text-slate-300 leading-relaxed">
+                              <div className="bg-white dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 p-3 rounded-[2px] text-[11px] text-slate-600 dark:text-slate-400 font-medium leading-relaxed shadow-[0_2px_8px_-2px_rgba(0,0,0,0.05)]">
                                 {renderCommentText(c.text)}
                               </div>
                             </div>
@@ -865,153 +977,157 @@ export default function TasksPage() {
                         ))}
                       </div>
 
-                      <div className="relative">
-                        {showMentionList && (
-                          <div className="absolute bottom-full left-0 mb-2 w-64 bg-white dark:bg-slate-800 border border-primary-100 dark:border-slate-700 rounded shadow-xl z-50 max-h-48 overflow-y-auto custom-scrollbar animate-scale-in">
-                            <div className="p-2 border-b border-primary-50 dark:border-slate-700 text-[10px] font-bold text-surface-400 uppercase tracking-widest">
-                              Mention User
-                            </div>
-                            {users.filter(u => u.name.toLowerCase().includes(mentionFilter.toLowerCase())).map(user => (
-                              <button
-                                key={user._id}
-                                onClick={() => handleSelectMention(user)}
-                                className="w-full flex items-center gap-3 p-2 hover:bg-primary-50 dark:hover:bg-primary-900/20 text-left transition-colors"
-                              >
-                                <div className="w-6 h-6 rounded bg-primary-500 flex items-center justify-center text-[10px] text-white font-bold">
-                                  {getInitials(user.name)}
-                                </div>
-                                <div className="flex flex-col">
-                                  <span className="text-xs font-bold text-surface-900 dark:text-white">{user.name}</span>
-                                  <span className="text-[10px] text-surface-400 dark:text-slate-500">{user.email}</span>
-                                </div>
-                              </button>
-                            ))}
-                            {users.filter(u => u.name.toLowerCase().includes(mentionFilter.toLowerCase())).length === 0 && (
-                              <div className="p-4 text-xs text-surface-400 italic text-center">
-                                No users found
+                      <div className="sticky bottom-0 bg-white dark:bg-slate-900 pt-4 pb-2">
+                        <div className="relative">
+                          {showMentionList && (
+                            <div className="absolute bottom-full left-0 mb-3 w-72 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-[2px] shadow-2xl z-[150] overflow-hidden animate-scale-in">
+                              <div className="p-3 border-b border-slate-100 dark:border-slate-800 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] bg-slate-50/50 dark:bg-slate-900/50">
+                                Deploy User Mention
                               </div>
-                            )}
+                              <div className="max-h-60 overflow-y-auto custom-scrollbar">
+                                {users.filter(u => u.name.toLowerCase().includes(mentionFilter.toLowerCase())).map(user => (
+                                  <button
+                                    key={user._id}
+                                    onClick={() => handleSelectMention(user)}
+                                    className="w-full flex items-center gap-3 p-3 hover:bg-primary-50 dark:hover:bg-primary-900/20 text-left transition-colors border-b border-slate-50 dark:border-slate-800/50 last:border-0"
+                                  >
+                                    <div className="w-8 h-8 rounded-[2px] bg-primary-500 flex items-center justify-center text-[10px] text-white font-black">
+                                      {getInitials(user.name)}
+                                    </div>
+                                    <div className="flex flex-col">
+                                      <span className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-tight">{user.name}</span>
+                                      <span className="text-[9px] font-medium text-slate-400 dark:text-slate-500">{user.email}</span>
+                                    </div>
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          <div className="flex gap-3">
+                            <input
+                              type="text"
+                              value={commentText}
+                              onChange={handleCommentChange}
+                              onKeyDown={(e) => e.key === 'Enter' && handleAddComment()}
+                              placeholder="Input comms brief..."
+                              className="flex-1 px-5 py-3 rounded-[2px] bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-xs font-bold outline-none focus:ring-1 focus:ring-primary-500 dark:text-white transition-all placeholder:text-slate-400 dark:placeholder:text-slate-600"
+                            />
+                            <button
+                              onClick={handleAddComment}
+                              disabled={!commentText.trim()}
+                              className="px-8 py-3 bg-primary-600 text-white rounded-[2px] text-xs font-black uppercase tracking-widest hover:bg-primary-700 transition-all disabled:opacity-30 shadow-lg shadow-primary-500/20 active:scale-95"
+                            >
+                              Post
+                            </button>
                           </div>
-                        )}
-                        <div className="flex gap-3 sticky bottom-0 bg-white dark:bg-slate-800 py-2">
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+
+                  {/* Right Column - Mission Metadata (30%) */}
+                  <div className="flex-[3] w-full md:w-auto p-4 md:p-6 bg-slate-50/50 dark:bg-slate-900/30 space-y-5 overflow-y-auto custom-scrollbar">
+                    <section className="space-y-5">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                          <span className="text-[9px] font-black text-slate-400 dark:text-slate-600 uppercase tracking-[0.2em] block">Status</span>
+                          <span className={`inline-flex px-2 py-1 rounded-[2px] text-[9px] font-black uppercase tracking-widest border ${selectedTask.status === 'done' ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' : 'bg-primary-500/10 text-primary-600 border-primary-500/20'}`}>
+                            {selectedTask.status.replace('_', ' ')}
+                          </span>
+                        </div>
+                        <div className="space-y-1.5">
+                          <span className="text-[9px] font-black text-slate-400 dark:text-slate-600 uppercase tracking-[0.2em] block">Priority</span>
+                          <span className={`inline-flex px-2 py-1 rounded-[2px] text-[9px] font-black uppercase tracking-widest border border-current opacity-80 ${getPriorityColor(selectedTask.priority).split(' ').pop()}`}>
+                            {selectedTask.priority}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <span className="text-[9px] font-black text-slate-400 dark:text-slate-600 uppercase tracking-[0.2em] block">Deployment Schedule</span>
+                        <div className="flex items-center gap-3 text-slate-900 dark:text-white font-black text-[10px] p-3 rounded-[2px] bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-800 shadow-sm">
+                          <FiCalendar className="w-3.5 h-3.5 text-primary-500" />
+                          <span className="tracking-widest uppercase">
+                            {selectedTask.dueDate ? formatDate(selectedTask.dueDate) : 'No Deadline Assigned'}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="space-y-3">
+                        <span className="text-[9px] font-black text-slate-400 dark:text-slate-600 uppercase tracking-[0.2em] block">Assigned Squad</span>
+                        <div className="flex flex-wrap gap-2">
+                          {selectedTask.assignees.map((a) => (
+                            <div key={a._id} className="flex items-center gap-2 bg-white dark:bg-slate-800 pl-1 pr-3 py-1 rounded-[2px] border border-slate-100 dark:border-slate-800 shadow-sm transition-transform hover:scale-105">
+                              <div className="w-6 h-6 rounded-[2px] bg-primary-500 flex items-center justify-center text-white font-black text-[9px] overflow-hidden shadow-md">
+                                {a.avatar ? <img src={a.avatar} alt={a.name} className="w-full h-full object-cover" /> : getInitials(a.name)}
+                              </div>
+                              <span className="text-[10px] font-black text-slate-800 dark:text-slate-200 uppercase tracking-tight">{a.name}</span>
+                            </div>
+                          ))}
+                          {!selectedTask.assignees.length && <span className="text-[9px] text-slate-400 font-black uppercase tracking-widest italic opacity-50">Empty Squad</span>}
+                        </div>
+                      </div>
+
+                      <div className="space-y-3 pt-3 border-t border-slate-200 dark:border-slate-800/50">
+                        <span className="text-[9px] font-black text-slate-400 dark:text-slate-600 uppercase tracking-[0.2em] block">Mission Tags</span>
+                        <div className="flex flex-wrap gap-1.5">
+                          {(selectedTask.tags || []).map((tag) => (
+                            <span key={tag} className="flex items-center gap-1.5 px-2 py-1 rounded-[2px] bg-primary-500/5 text-primary-600 dark:text-primary-400 text-[9px] font-black uppercase tracking-widest border border-primary-500/10 group">
+                              {tag}
+                              <button onClick={() => handleRemoveTag(tag)} className="hover:text-red-500 transition-colors">
+                                <FiX className="w-3 h-3" />
+                              </button>
+                            </span>
+                          ))}
+                        </div>
+                        <div className="flex gap-2">
                           <input
                             type="text"
-                            value={commentText}
-                            onChange={handleCommentChange}
-                            onKeyDown={(e) => e.key === 'Enter' && handleAddComment()}
-                            placeholder="Write a comment..."
-                            className="flex-1 px-4 py-2 rounded bg-surface-50 dark:bg-slate-700 border border-primary-100 dark:border-slate-600 text-sm outline-none focus:ring-1 focus:ring-primary-500 dark:text-white transition-all"
+                            value={newTag}
+                            onChange={(e) => setNewTag(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddTag())}
+                            placeholder="Add mission tag..."
+                            className="flex-1 min-w-0 px-3 py-1.5 rounded-[2px] bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-800 text-[9px] font-black uppercase tracking-widest outline-none focus:ring-1 focus:ring-primary-500 dark:text-white"
                           />
                           <button
-                            onClick={handleAddComment}
-                            disabled={!commentText.trim()}
-                            className="px-6 py-2 bg-primary-600 text-white rounded text-sm font-bold hover:bg-primary-700 transition-all disabled:opacity-50 shadow-sm shadow-primary-500/20"
+                            onClick={handleAddTag}
+                            className="px-3 py-1.5 bg-slate-900 dark:bg-primary-600 text-white rounded-[2px] text-[9px] font-black uppercase tracking-widest hover:bg-slate-800 dark:hover:bg-primary-700 transition-all shadow-md"
                           >
-                            Post
+                            Add
                           </button>
                         </div>
                       </div>
-                    </div>
-                  </div>
 
-                  {/* Right Column - Sidebar Info */}
-                  <div className="w-full md:w-80 p-6 md:p-8 bg-surface-50/20 dark:bg-slate-900/10 space-y-8">
-                    {/* Status & Priority Row */}
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <span className="text-[10px] font-bold text-surface-400 uppercase tracking-widest mb-2 block">Status</span>
-                        <span className={`inline-flex px-2 py-1 rounded text-[10px] font-bold uppercase ${selectedTask.status === 'done' ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400' : 'bg-primary-50 text-primary-600 dark:bg-primary-500/10 dark:text-primary-400'}`}>
-                          {selectedTask.status.replace('_', ' ')}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="text-[10px] font-bold text-surface-400 uppercase tracking-widest mb-2 block">Priority</span>
-                        <span className={`inline-flex px-2 py-1 rounded text-[10px] font-bold uppercase ${getPriorityColor(selectedTask.priority)}`}>
-                          {selectedTask.priority}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div>
-                      <span className="text-[10px] font-bold text-surface-400 uppercase tracking-widest mb-3 block">Assignees</span>
-                      <div className="flex flex-wrap gap-2">
-                        {selectedTask.assignees.map((a) => (
-                          <div key={a._id} className="flex items-center gap-2 bg-white dark:bg-slate-800 pr-3 pl-1 py-1 rounded border border-primary-100 dark:border-slate-700 shadow-sm">
-                            <div className="w-6 h-6 rounded bg-primary-500 flex items-center justify-center text-white font-bold text-[10px] overflow-hidden">
-                              {a.avatar ? <img src={a.avatar} alt={a.name} className="w-full h-full object-cover" /> : getInitials(a.name)}
+                      <div className="space-y-4 pt-3 border-t border-slate-200 dark:border-slate-800/50">
+                        <span className="text-[9px] font-black text-slate-400 dark:text-slate-600 uppercase tracking-[0.2em] block">Payload Intel</span>
+                        <div className="grid grid-cols-2 gap-2">
+                          {(selectedTask.images || []).map((img, i) => (
+                            <div key={i} className="relative group aspect-square rounded-[2px] overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm">
+                              <img src={img} alt="" className="w-full h-full object-cover transition-transform group-hover:scale-110" />
+                              <button
+                                onClick={() => handleRemoveImage(img)}
+                                className="absolute top-1.5 right-1.5 p-1 bg-red-500 text-white rounded-[2px] opacity-0 group-hover:opacity-100 transition-all shadow-lg"
+                              >
+                                <FiX className="w-3 h-3" />
+                              </button>
                             </div>
-                            <span className="text-[11px] font-bold text-surface-700 dark:text-slate-200">{a.name}</span>
+                          ))}
+                        </div>
+                        <label className={`w-full flex flex-col items-center justify-center gap-2 px-4 py-5 rounded-[2px] border-2 border-dashed border-slate-200 dark:border-slate-800 text-slate-400 dark:text-slate-600 text-[9px] font-black uppercase tracking-[0.2em] cursor-pointer hover:bg-slate-50 dark:hover:bg-white/5 transition-all group ${uploadingImage ? 'opacity-30 pointer-events-none' : ''}`}>
+                          <div className="p-2 bg-slate-100 dark:bg-slate-800 rounded-full group-hover:scale-110 transition-transform">
+                             <FiUpload className="w-4 h-4" />
                           </div>
-                        ))}
-                        {!selectedTask.assignees.length && <span className="text-xs text-surface-400 italic">No assignees</span>}
+                          {uploadingImage ? 'Uploading...' : 'Upload Payload'}
+                          <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+                        </label>
                       </div>
-                    </div>
-
-                    <div>
-                      <span className="text-[10px] font-bold text-surface-400 uppercase tracking-widest mb-2 block">Deadline</span>
-                      <div className="flex items-center gap-2 text-surface-900 dark:text-white font-bold text-xs ring-1 ring-primary-100 dark:ring-slate-700 p-3 rounded bg-white dark:bg-slate-800/50 shadow-sm">
-                        <FiCalendar className="w-4 h-4 text-primary-500" />
-                        {selectedTask.dueDate ? formatDate(selectedTask.dueDate) : 'No deadline set'}
-                      </div>
-                    </div>
-
-                    <div>
-                      <span className="text-[10px] font-bold text-surface-400 uppercase tracking-widest mb-3 block">Tags</span>
-                      <div className="flex flex-wrap gap-2 mb-3">
-                        {(selectedTask.tags || []).map((tag) => (
-                          <span key={tag} className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 text-[10px] font-bold uppercase tracking-tight">
-                            {tag}
-                            <button onClick={() => handleRemoveTag(tag)} className="hover:text-red-500 flex items-center">
-                              <FiX className="w-3 h-3" />
-                            </button>
-                          </span>
-                        ))}
-                      </div>
-                      <div className="flex gap-2">
-                        <input
-                          type="text"
-                          value={newTag}
-                          onChange={(e) => setNewTag(e.target.value)}
-                          onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddTag())}
-                          placeholder="Add tag..."
-                          className="flex-1 min-w-0 px-3 py-1.5 rounded bg-white dark:bg-slate-800 border border-primary-100 dark:border-slate-700 text-[10px] outline-none focus:ring-1 focus:ring-primary-500 dark:text-white"
-                        />
-                        <button
-                          onClick={handleAddTag}
-                          className="px-3 py-1.5 bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 rounded text-[10px] font-bold hover:bg-primary-100 dark:hover:bg-primary-900/50"
-                        >
-                          Add
-                        </button>
-                      </div>
-                    </div>
-
-                    <div>
-                      <span className="text-[10px] font-bold text-surface-400 uppercase tracking-widest mb-3 block">Attachments</span>
-                      <div className="grid grid-cols-3 gap-2 mb-4">
-                        {(selectedTask.images || []).map((img, i) => (
-                          <div key={i} className="relative group aspect-square rounded overflow-hidden border border-primary-100 dark:border-slate-700">
-                            <img src={img} alt="" className="w-full h-full object-cover" />
-                            <button
-                              onClick={() => handleRemoveImage(img)}
-                              className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded opacity-0 group-hover:opacity-100 transition-all"
-                            >
-                              <FiX className="w-2.5 h-2.5" />
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                      <label className={`w-full flex items-center justify-center gap-2 px-3 py-3 rounded border-2 border-dashed border-primary-200 dark:border-primary-800 text-primary-600 dark:text-primary-400 text-[10px] font-bold cursor-pointer hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-all ${uploadingImage ? 'opacity-50 pointer-events-none' : ''}`}>
-                        <FiUpload className="w-3.5 h-3.5" />
-                        {uploadingImage ? 'Uploading...' : 'Upload Image'}
-                        <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
-                      </label>
-                    </div>
+                    </section>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             </div>
-          </div>
-        )}
+          )}
+        </AnimatePresence>
 
         {/* Board Panel */}
         {showBoardPanel && (

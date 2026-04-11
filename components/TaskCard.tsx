@@ -71,6 +71,12 @@ export default function TaskCard({ task, onClick }: TaskCardProps) {
     opacity: isDragging ? 0.3 : 1,
   };
 
+  const priorityColors = {
+    high: 'border-l-red-500',
+    medium: 'border-l-amber-500',
+    low: 'border-l-primary-500'
+  };
+
   return (
     <div
       ref={setNodeRef}
@@ -78,72 +84,52 @@ export default function TaskCard({ task, onClick }: TaskCardProps) {
       {...attributes}
       {...listeners}
       onClick={onClick}
-      className={`bg-white dark:bg-slate-800 p-4 rounded-[4px] shadow-md hover:shadow-xl border border-primary-50 dark:border-slate-800 transition-all duration-300 cursor-pointer group hover:-translate-y-1 ${isDragging ? 'shadow-2xl scale-[1.02] z-50 ring-2 ring-primary-400' : ''}`}
+      className={`bg-white dark:bg-slate-800 p-3.5 rounded-[2px] shadow-sm hover:shadow-xl border border-slate-200 dark:border-slate-800 border-l-4 ${priorityColors[task.priority as keyof typeof priorityColors] || 'border-l-slate-300'} transition-all duration-300 cursor-pointer group hover:-translate-y-0.5 ${isDragging ? 'shadow-2xl scale-[1.02] z-50 ring-2 ring-primary-400' : ''}`}
     >
       <div className="flex justify-between items-start mb-2">
         <div
-          className={`flex items-center gap-1.5 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${getStatusBadgeColor(task.status)}`}
+          className={`flex items-center gap-1 px-1.5 py-0.5 rounded-[2px] text-[8px] font-black uppercase tracking-widest ${getStatusBadgeColor(task.status)}`}
         >
-          <div
-            className={`w-1 h-1 rounded-full ${task.status === 'done' ? 'bg-emerald-500' : 'bg-current'}`}
-          ></div>
           {getStatusText(task.status)}
         </div>
         <div
-          className={`px-2 py-0.5 rounded text-[9px] font-bold capitalize ${getPriorityColor(task.priority)}`}
+          className={`px-1.5 py-0.5 rounded-[2px] text-[8px] font-black uppercase tracking-widest ${getPriorityColor(task.priority)}`}
         >
           {task.priority}
         </div>
       </div>
 
-      <h3 className="font-bold text-surface-900 dark:text-white text-sm mb-0.5 leading-snug group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+      <h3 className="font-black text-surface-900 dark:text-white text-[12px] mb-1 leading-tight group-hover:text-primary-600 transition-colors uppercase tracking-tight">
         {task.title}
       </h3>
-      <p className="text-[11px] text-surface-500 dark:text-slate-400 line-clamp-1 mb-3">
-        {task.description || 'No description provided.'}
+      <p className="text-[10px] text-surface-400 dark:text-slate-500 font-bold uppercase tracking-tighter line-clamp-2 mb-3 leading-relaxed">
+        {task.description || 'No operational brief provided.'}
       </p>
 
-      <div className="space-y-2">
+      <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800/50">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5 text-surface-400 dark:text-slate-500">
             <FiCalendar className="w-3 h-3" />
-            <span className="text-[10px] font-medium">
+            <span className="text-[9px] font-black uppercase tracking-widest">
               {task.dueDate
-                ? new Date(task.dueDate).toLocaleDateString('en-GB')
-                : 'No date'}
+                ? new Date(task.dueDate).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' })
+                : 'NO DEADLINE'}
             </span>
           </div>
-          <div className="flex -space-x-1.5 ring-offset-2 ring-white dark:ring-slate-800">
+          <div className="flex -space-x-1.5">
             {task.assignees?.slice(0, 3).map((user, i) => (
               <div
                 key={user._id}
-                className="w-5 h-5 rounded border border-white dark:border-slate-800 bg-gradient-to-br from-primary-300 to-primary-500 flex items-center justify-center text-[8px] font-bold text-white overflow-hidden"
+                className="w-5 h-5 rounded-[2px] border border-white dark:border-slate-800 bg-primary-100 flex items-center justify-center text-[8px] font-black text-primary-700 overflow-hidden shadow-sm"
                 style={{ zIndex: task.assignees.length - i }}
                 title={user.name}
               >
                 {user.avatar ? <img src={user.avatar} alt="" className="w-full h-full object-cover" /> : getInitials(user.name)}
               </div>
             ))}
-            {task.assignees?.length > 3 && (
-              <div className="w-5 h-5 rounded border border-white dark:border-slate-800 bg-surface-100 dark:bg-slate-700 flex items-center justify-center text-[8px] font-bold text-surface-500 z-0">
-                +{task.assignees.length - 3}
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3 pt-2 border-t border-primary-50 dark:border-slate-700/50">
-          <div className="flex items-center gap-1 text-surface-400 dark:text-slate-500">
-            <FiMessageCircle className="w-3 h-3" />
-            <span className="text-[9px] font-medium">{task.comments?.length || 0}</span>
-          </div>
-          <div className="flex items-center gap-1 text-surface-400 dark:text-slate-500">
-            <FiLink className="w-3 h-3" />
-            <span className="text-[9px] font-medium">{task.links || 0}</span>
           </div>
         </div>
       </div>
     </div>
-
   );
 }
