@@ -8,6 +8,7 @@ import { useAuthStore } from '../../../../../store/authStore';
 import { useGameSocket } from '../../../../../hooks/useGameSocket';
 import { useSocket } from '../../../../../hooks/useSocket';
 import { FiCopy, FiArrowLeft, FiRefreshCw } from 'react-icons/fi';
+import { motion } from 'framer-motion';
 
 
 
@@ -60,6 +61,55 @@ const getCompletedLines = (grid: number[], calledNumbers: number[]) => {
 
 const checkBingoLines = (grid: number[], calledNumbers: number[]) => {
   return getCompletedLines(grid, calledNumbers).length;
+};
+
+const Celebration = () => {
+  const particles = Array.from({ length: 100 });
+  const colors = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
+  
+  return (
+    <div className="fixed inset-0 pointer-events-none z-[100] overflow-hidden">
+      {particles.map((_, i) => (
+        <motion.div
+          key={i}
+          initial={{ 
+            x: '50vw', 
+            y: '50vh', 
+            scale: 0, 
+            rotate: 0,
+            opacity: 1 
+          }}
+          animate={{ 
+            x: [`50vw`, `${Math.random() * 100}vw`],
+            y: [`50vh`, `${Math.random() * 100}vh`],
+            scale: [0, 1, 0.5, 0],
+            rotate: Math.random() * 720,
+            opacity: [1, 1, 0.5, 0]
+          }}
+          transition={{ 
+            duration: 2 + Math.random() * 3,
+            ease: "easeOut",
+            repeat: Infinity,
+            repeatDelay: Math.random() * 2
+          }}
+          className="absolute w-2 h-2 md:w-3 md:h-3 rounded-sm"
+          style={{ 
+            backgroundColor: colors[Math.floor(Math.random() * colors.length)],
+            boxShadow: '0 0 10px rgba(0,0,0,0.1)'
+          }}
+        />
+      ))}
+      <motion.div 
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: [0, 1.2, 1], opacity: 1 }}
+        transition={{ duration: 0.8, ease: "backOut" }}
+        className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none"
+      >
+        <div className="text-6xl md:text-8xl font-black text-emerald-500 dark:text-emerald-400 drop-shadow-2xl filter blur-[1px] opacity-20 absolute inset-0 animate-pulse">BINGO!</div>
+        <div className="text-6xl md:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-500 drop-shadow-lg relative">BINGO!</div>
+      </motion.div>
+    </div>
+  );
 };
 
 export default function BingoPage() {
@@ -182,54 +232,28 @@ export default function BingoPage() {
           {/* Status Alert */}
           <div className="animate-fade-in text-center lg:text-left">
             {currentRoom.status === 'waiting' ? (
-              <div className="inline-flex items-center gap-2 px-6 py-3 rounded bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 font-bold border border-amber-200 dark:border-amber-500/20 shadow-sm">
+              <div className="flex items-center justify-center lg:justify-start gap-2 px-6 py-3 rounded bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 font-bold border border-amber-200 dark:border-amber-500/20 shadow-xl shadow-amber-500/5 transition-all">
                 <FiRefreshCw className="w-5 h-5 animate-spin" /> Waiting for opponent...
               </div>
             ) : currentRoom.status === 'completed' ? (
-              <div className="inline-flex flex-col items-center lg:items-start gap-1 px-8 py-5 rounded bg-gradient-to-br from-emerald-400 to-teal-500 text-white shadow-xl shadow-teal-500/30 transform scale-105">
-                <span className="text-3xl font-black">{currentRoom.winner?.name || winnerId === user._id ? 'You Win!' : 'Opponent Wins!'}</span>
-                <span className="text-sm font-bold opacity-90 uppercase tracking-widest bg-white/20 px-3 py-1 rounded mt-2">Bingo!</span>
-              </div>
+              <>
+                {winnerId === user._id && <Celebration />}
+                <div className="flex flex-col items-center lg:items-start gap-1 px-8 py-5 rounded bg-gradient-to-br from-emerald-400 to-teal-500 text-white shadow-[0_20px_40px_-15px_rgba(16,185,129,0.5)] transition-all">
+                  <span className="text-3xl font-black">{winnerId === user._id ? 'You Win!' : `${currentRoom.winner?.name || 'Opponent'} Wins!`}</span>
+                  <span className="text-sm font-bold opacity-90 uppercase tracking-widest bg-white/20 px-3 py-1 rounded mt-2">Bingo!</span>
+                </div>
+              </>
             ) : (
-              <div className={`inline-flex items-center gap-2 px-8 py-4 rounded font-bold shadow-lg transition-colors text-lg ${isMyTurn ? 'bg-emerald-500 text-white shadow-emerald-500/30 ring-4 ring-emerald-500/20' : 'bg-white dark:bg-slate-800 text-surface-600 dark:text-slate-300 border border-surface-100 dark:border-slate-700'}`}>
+              <div className={`flex items-center justify-center lg:justify-start gap-2 px-8 py-4 rounded font-bold transition-all text-lg ${isMyTurn ? 'bg-emerald-500 text-white shadow-[0_10px_30px_-10px_rgba(16,185,129,0.5)] ring-4 ring-emerald-500/20' : 'bg-white dark:bg-slate-800 text-surface-600 dark:text-slate-300 border border-surface-100 dark:border-slate-700 shadow-xl shadow-surface-200/50 dark:shadow-black/20'}`}>
                 {isMyTurn ? "Your Turn! Pick a number" : "Waiting for opponent's pick..."}
               </div>
             )}
           </div>
 
-          {/* Players Info */}
-          <div className="bg-white dark:bg-slate-800 rounded p-6 shadow-sm border border-surface-100 dark:border-slate-700">
-            <h3 className="text-xs font-bold text-surface-400 uppercase tracking-widest mb-4">Match Info</h3>
-            
-            <div className="space-y-4">
-              <div className={`flex items-center justify-between p-3 rounded transition-colors ${currentTurnId === user._id ? 'bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20' : 'bg-surface-50 dark:bg-slate-700'}`}>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white font-bold shadow-md">You</div>
-                  <span className="font-bold text-surface-900 dark:text-white truncate max-w-[120px]">{user.name}</span>
-                </div>
-                <div className="text-right">
-                  <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400">{Math.min(linesCompleted, 5)}/5</div>
-                  <div className="text-[10px] font-bold text-surface-400 uppercase">Lines</div>
-                </div>
-              </div>
 
-              <div className="flex justify-center text-surface-300 dark:text-slate-600 font-bold text-sm italic">VS</div>
-
-              <div className={`flex items-center justify-between p-3 rounded transition-colors ${currentTurnId === opponentId ? 'bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20' : 'bg-surface-50 dark:bg-slate-700'}`}>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded bg-surface-300 dark:bg-slate-600 flex items-center justify-center text-white font-bold">Opp</div>
-                  <span className="font-bold text-surface-900 dark:text-white truncate max-w-[120px]">{player1?._id === opponentId ? player1?.name : player2?.name || 'Waiting...'}</span>
-                </div>
-                <div className="text-right">
-                  <div className="text-2xl font-black text-surface-600 dark:text-slate-300">{Math.min(opponentLines, 5)}/5</div>
-                  <div className="text-[10px] font-bold text-surface-400 uppercase">Lines</div>
-                </div>
-              </div>
-            </div>
-          </div>
 
           {/* Move History */}
-          <div className="bg-white dark:bg-slate-800 rounded p-6 shadow-sm border border-surface-100 dark:border-slate-700">
+          <div className="bg-white dark:bg-slate-800 rounded p-6 shadow-[0_15px_40px_-15px_rgba(0,0,0,0.1)] dark:shadow-2xl dark:shadow-black/40 border border-surface-100 dark:border-slate-700">
             <h3 className="text-xs font-bold text-surface-400 uppercase tracking-widest mb-4 flex items-center justify-between">
               <span>Move History</span>
               <span className="bg-surface-100 dark:bg-slate-700 text-surface-500 dark:text-slate-400 px-2 py-0.5 rounded-full text-[10px]">{calledNumbers.length} Picks</span>
@@ -238,11 +262,21 @@ export default function BingoPage() {
               <div className="text-sm text-surface-400 dark:text-slate-500 italic text-center py-4">No numbers picked yet...</div>
             ) : (
               <div className="flex flex-wrap gap-2">
-                {calledNumbers.map((num, idx) => (
-                  <div key={idx} className="w-8 h-8 bg-surface-100 dark:bg-slate-700 text-surface-600 dark:text-slate-300 rounded-full flex items-center justify-center text-sm font-bold shadow-sm animate-scale-in">
-                    {num}
-                  </div>
-                ))}
+                {calledNumbers.map((num, idx) => {
+                  const isLast = idx === calledNumbers.length - 1;
+                  return (
+                    <div 
+                      key={idx} 
+                      className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shadow-sm animate-scale-in transition-all duration-300 ${
+                        isLast 
+                          ? 'bg-emerald-500 text-white ring-4 ring-emerald-500/20 scale-110' 
+                          : 'bg-surface-100 dark:bg-slate-700 text-surface-600 dark:text-slate-300'
+                      }`}
+                    >
+                      {num}
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>
@@ -250,7 +284,7 @@ export default function BingoPage() {
 
         {/* Right Side: The Grid */}
         <div className="lg:col-span-7 flex justify-center items-start">
-          <div className="bg-white dark:bg-slate-800 p-4 md:p-6 rounded shadow-2xl border border-surface-100 dark:border-slate-700 w-full max-w-md">
+          <div className="bg-white dark:bg-slate-800 p-4 md:p-6 rounded shadow-[0_30px_100px_-20px_rgba(0,0,0,0.15)] dark:shadow-[0_30px_100px_-20px_rgba(0,0,0,0.6)] border border-surface-100 dark:border-slate-700 w-full max-w-md">
             {/* Grid */}
             <div className="relative grid grid-cols-5 gap-2 md:gap-3">
               {/* Full line strike overlay */}

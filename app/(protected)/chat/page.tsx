@@ -373,37 +373,41 @@ export default function ChatPage() {
           </div>
 
           <div className="flex-1 overflow-y-auto custom-scrollbar">
-            {conversations
+              {conversations
               .filter(c => c.otherUser.name.toLowerCase().includes(searchTerm.toLowerCase()))
-              .map(conv => (
-                <div
-                  key={conv.conversationId}
-                  onClick={() => handleSelectConversation(conv)}
-                  className={`flex items-center gap-3 p-4 cursor-pointer transition-all border-b border-primary-50/30 dark:border-slate-800/50 hover:bg-primary-50/50 dark:hover:bg-slate-800/50 ${activeConversation === conv.conversationId ? 'bg-primary-50 dark:bg-slate-800 border-r-4 border-r-primary-500' : ''}`}
-                >
-                  <div className="relative flex-shrink-0">
-                    <div className="w-10 h-10 rounded-[4px] bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-bold text-sm">
-                      {getInitials(conv.otherUser.name)}
+              .map((conv, idx) => (
+                <React.Fragment key={conv.conversationId}>
+                  <div
+                    onClick={() => handleSelectConversation(conv)}
+                    className={`flex items-center gap-3 p-4 cursor-pointer transition-all hover:bg-primary-50/50 dark:hover:bg-slate-800/50 ${activeConversation === conv.conversationId ? 'bg-primary-50 dark:bg-slate-800 border-r-4 border-r-primary-500' : ''}`}
+                  >
+                    <div className="relative flex-shrink-0">
+                      <div className="w-10 h-10 rounded-[4px] bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-bold text-sm">
+                        {getInitials(conv.otherUser.name)}
+                      </div>
+                      {isUserOnline(conv.otherUser._id) && (
+                        <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 border-2 border-white dark:border-slate-900 rounded-full"></div>
+                      )}
                     </div>
-                    {isUserOnline(conv.otherUser._id) && (
-                      <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 border-2 border-white dark:border-slate-900 rounded-full"></div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex justify-between items-baseline mb-0.5">
+                        <span className="text-sm font-bold text-surface-900 dark:text-white truncate">{conv.otherUser.name}</span>
+                        <span className="text-[10px] text-surface-400 font-medium">{timeAgo(conv.lastMessage.createdAt)}</span>
+                      </div>
+                      <p className="text-xs text-surface-500 dark:text-slate-400 truncate font-medium">
+                        {decryptedPreviews[conv.conversationId] || conv.lastMessage.content}
+                      </p>
+                    </div>
+                    {conv.unreadCount > 0 && (
+                      <div className="bg-primary-600 text-white text-[10px] font-black px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
+                        {conv.unreadCount}
+                      </div>
                     )}
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex justify-between items-baseline mb-0.5">
-                      <span className="text-sm font-bold text-surface-900 dark:text-white truncate">{conv.otherUser.name}</span>
-                      <span className="text-[10px] text-surface-400 font-medium">{timeAgo(conv.lastMessage.createdAt)}</span>
-                    </div>
-                    <p className="text-xs text-surface-500 dark:text-slate-400 truncate font-medium">
-                      {decryptedPreviews[conv.conversationId] || conv.lastMessage.content}
-                    </p>
-                  </div>
-                  {conv.unreadCount > 0 && (
-                    <div className="bg-primary-600 text-white text-[10px] font-black px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
-                      {conv.unreadCount}
-                    </div>
+                  {idx < conversations.length - 1 && (
+                    <div className="mx-4 h-[1px] bg-primary-50 dark:bg-slate-800/50" />
                   )}
-                </div>
+                </React.Fragment>
               ))}
           </div>
         </div>
@@ -445,7 +449,20 @@ export default function ChatPage() {
                 </div>
               </div>
 
-              <div className="flex-1 overflow-y-auto p-6 md:p-8 space-y-4 custom-scrollbar bg-primary-50/10 dark:bg-slate-950/20">
+              <div className="flex-1 relative overflow-hidden bg-[#f0f9f8] dark:bg-[#0a1a19]">
+                {/* Premium Blended Background Layer */}
+                <div 
+                  className="absolute inset-0 z-0 pointer-events-none opacity-10"
+                  style={{ 
+                    backgroundImage: 'url(/chat_bg.png)',
+                    backgroundSize: '400px',
+                    backgroundRepeat: 'repeat',
+                    filter: 'blur(0.5px)',
+                    mixBlendMode: 'multiply'
+                  }}
+                />
+
+                <div className="absolute inset-0 z-10 overflow-y-auto p-6 md:p-8 space-y-4 custom-scrollbar scroll-smooth">
                 <div className="flex justify-center mb-8">
                   <div className="flex items-center gap-2 px-4 py-2 bg-primary-600/10 dark:bg-primary-500/10 rounded-[4px] border border-primary-200/50 dark:border-primary-500/20">
                     <FiShield className="w-3 h-3 text-primary-600" />
@@ -479,6 +496,7 @@ export default function ChatPage() {
                 })}
                 <div ref={messagesEndRef} />
               </div>
+            </div>
 
               <div className="p-4 md:p-6 bg-white dark:bg-slate-900 border-t border-primary-50 dark:border-slate-800">
                 <div className="flex items-center gap-3">
