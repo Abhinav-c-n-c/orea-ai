@@ -289,3 +289,139 @@ html.dark .skeleton {
 html.dark .bg-orb {
   opacity: 0.1;
 }
+
+/* Wave Background */
+.wave-container {
+  position: absolute;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  background-color: #0d94893d;
+  z-index: -1;
+  top: 0;
+  left: 0;
+}
+html.dark .wave-container {
+  background-color: #0f172a;
+}
+
+.wave {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: url('https://i.imgur.com/DLD3N2t.png');
+  background-size: 100vw 80vh;
+  filter: blur(2px);
+}
+html.dark .wave {
+  filter: blur(2px) opacity(0.15);
+}
+
+.wave1 {
+  animation: animateWave 20s linear infinite;
+  z-index: 15;
+  opacity: 0.9;
+  height: 70vh;
+  animation-delay: 0s;
+  bottom: 0;
+}
+.wave2 {
+  animation: animateWave2 30s linear infinite;
+  z-index: 10;
+  opacity: 0.7;
+  animation-delay: -5s;
+  height: 68vh;
+  bottom: 0px;
+}
+.wave3 {
+  animation: animateWave 25s linear infinite;
+  z-index: 5;
+  opacity: 0.4;
+  animation-delay: -3s;
+  height: 80vh;
+  bottom: 0px;
+}
+.wave4 {
+  animation: animateWave2 15s linear infinite;
+  z-index: 1;
+  opacity: 0.5;
+  height: 60vh;
+  animation-delay: -7s;
+  bottom: 0px;
+}
+
+@keyframes animateWave {
+  0% {
+    background-position-x: 0;
+  }
+  100% {
+    background-position-x: 100vw;
+  }
+}
+@keyframes animateWave2 {
+  0% {
+    background-position-x: 0;
+  }
+  100% {
+    background-position-x: -100vw;
+  }
+}
+
+/* Divider Animations */
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.4), 0 0 20px rgba(255, 255, 255, 0.2);
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.8), 0 0 30px rgba(255, 255, 255, 0.4);
+    transform: scale(1.2);
+    opacity: 1;
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 2s ease-in-out infinite;
+}
+
+@keyframes scanLine {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-scan-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 1px;
+  width: 100%;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.8) 50%, transparent 100%);
+  animation: scanLine 3s ease-in-out infinite;
+}
+
+@keyframes scan-fast {
+  0% { transform: translateX(-200%); }
+  100% { transform: translateX(300%); }
+}
+
+.animate-scan-fast {
+  animation: scan-fast 3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes slow-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.animate-slow-float {
+  animation: slow-float 6s ease-in-out infinite;
+}
+
+
+

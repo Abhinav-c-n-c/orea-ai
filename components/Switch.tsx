@@ -13,7 +13,7 @@ export default function Switch({ label, className, ...props }: SwitchProps) {
         <input type="checkbox" className="sr-only" {...props} />
         <div
           className={`block w-10 h-6 rounded-full transition-colors ${
-            props.checked ? 'bg-indigo-600' : 'bg-gray-300'
+            props.checked ? 'bg-primary-600' : 'bg-surface-200 dark:bg-slate-700'
           } ${props.disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
         ></div>
         <div

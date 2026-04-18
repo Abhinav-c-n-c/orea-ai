@@ -5,7 +5,16 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../../store/authStore';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiUser, FiMail, FiLock, FiCheck, FiArrowRight, FiShield, FiZap, FiLayout } from 'react-icons/fi';
+import {
+  FiUser,
+  FiMail,
+  FiLock,
+  FiCheck,
+  FiArrowRight,
+  FiShield,
+  FiZap,
+  FiLayout,
+} from 'react-icons/fi';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -50,14 +59,17 @@ export default function RegisterPage() {
         {/* Left Card - Value Proposition */}
         <div className="lg:w-[38%] bg-gradient-to-br from-sidebar to-sidebar-dark p-8 md:p-10 flex flex-col justify-between relative overflow-hidden rounded-[4px] shadow-2xl border border-white/5">
           <div className="relative z-10 flex flex-col items-center text-center">
-            <motion.div whileHover={{ rotate: -5, scale: 1.1 }} className="mb-8 flex justify-center w-full">
+            <motion.div
+              whileHover={{ rotate: -5, scale: 1.1 }}
+              className="mb-8 flex justify-center w-full"
+            >
               <img
                 src="https://res.cloudinary.com/dybv5ghlb/image/upload/v1775387898/orea-logo_c0dkac.png"
                 alt="Orea Logo"
                 className="h-20 object-contain"
               />
             </motion.div>
-            
+
             <h1 className="text-2xl md:text-3xl font-black text-white leading-tight uppercase tracking-tight mb-4">
               Join the <br />
               <span className="text-primary-300 font-black">Intelligence Network.</span>
@@ -69,35 +81,39 @@ export default function RegisterPage() {
 
             <div className="space-y-6 border-t border-white/5 pt-8 mt-4 w-full max-w-[280px]">
               {[
-                { 
-                  title: 'Secure Environment', 
+                {
+                  title: 'Secure Environment',
                   desc: 'Enterprise-grade encryption for every note and task.',
-                  icon: <FiShield className="w-5 h-5" />
+                  icon: <FiShield className="w-5 h-5" />,
                 },
-                { 
-                  title: 'Real-time Velocity', 
+                {
+                  title: 'Real-time Velocity',
                   desc: 'Instant synchronization across your entire workspace.',
-                  icon: <FiZap className="w-5 h-5" />
+                  icon: <FiZap className="w-5 h-5" />,
                 },
-                { 
-                  title: 'Infinite Workspace', 
+                {
+                  title: 'Infinite Workspace',
                   desc: 'Unlimited projects, notes, and collaborative nodes.',
-                  icon: <FiLayout className="w-5 h-5" />
-                }
+                  icon: <FiLayout className="w-5 h-5" />,
+                },
               ].map((feature, i) => (
-                <motion.div 
+                <motion.div
                   key={i}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.2 + (i * 0.1) }}
+                  transition={{ delay: 0.2 + i * 0.1 }}
                   className="flex items-start gap-4 text-left group"
                 >
                   <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-primary-300 group-hover:scale-110 group-hover:bg-primary-300 group-hover:text-sidebar transition-all duration-300">
                     {feature.icon}
                   </div>
                   <div>
-                    <h4 className="text-sm font-black text-white uppercase tracking-widest mb-1">{feature.title}</h4>
-                    <p className="text-xs text-primary-200/60 font-medium leading-relaxed">{feature.desc}</p>
+                    <h4 className="text-sm font-black text-white uppercase tracking-widest mb-1">
+                      {feature.title}
+                    </h4>
+                    <p className="text-xs text-primary-200/60 font-medium leading-relaxed">
+                      {feature.desc}
+                    </p>
                   </div>
                 </motion.div>
               ))}

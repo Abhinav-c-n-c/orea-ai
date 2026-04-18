@@ -74,7 +74,7 @@ export default function DashboardPage() {
     : [];
 
   return (
-    <main className="flex-1 flex flex-col h-full overflow-hidden bg-surface-50 dark:bg-slate-950 p-6 gap-6">
+    <main className="flex-1 flex flex-col h-full overflow-hidden p-6 gap-6">
       <Header 
         title="Dashboard" 
         subtitle="Overview of your workspace" 

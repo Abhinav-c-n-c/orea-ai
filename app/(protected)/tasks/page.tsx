@@ -110,6 +110,76 @@ const OhSitAlert = ({ active }: { active: boolean }) => {
   );
 };
 
+const FilterDropdown = ({ 
+  label, 
+  value, 
+  onChange, 
+  options, 
+  icon: Icon 
+}: { 
+  label: string; 
+  value: string; 
+  onChange: (val: string) => void; 
+  options: { label: string; value: string }[]; 
+  icon: any;
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const selectedLabel = options.find(o => o.value === value)?.label || 'All';
+
+  return (
+    <div className="relative w-full">
+      <div className="flex flex-col w-full">
+        <label className="text-[8px] font-black text-slate-400 uppercase tracking-[0.1em] mb-0.5 ml-1">
+          {label}
+        </label>
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className={`flex items-center gap-2 px-3 py-1.5 rounded-[4px] bg-slate-50 dark:bg-slate-800 border transition-all text-xs font-bold w-full justify-between ${
+            isOpen ? 'border-primary-500 shadow-sm' : 'border-transparent hover:border-slate-200 dark:hover:border-slate-700'
+          }`}
+        >
+          <div className="flex items-center gap-2">
+            <Icon className="w-3 h-3 text-slate-400" />
+            <span className="text-slate-700 dark:text-slate-300 truncate max-w-[80px]">{selectedLabel}</span>
+          </div>
+          <FiChevronDown className={`w-3 h-3 text-slate-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        </button>
+      </div>
+
+      <AnimatePresence>
+        {isOpen && (
+          <>
+            <div className="fixed inset-0 z-[80]" onClick={() => setIsOpen(false)} />
+            <motion.div
+              initial={{ opacity: 0, y: 5, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 5, scale: 0.95 }}
+              className="absolute left-0 top-full mt-1 w-full bg-white dark:bg-slate-900 rounded-[4px] shadow-[0_10px_25px_-5px_rgba(0,0,0,0.15)] border border-slate-100 dark:border-slate-800 z-[90] overflow-hidden"
+            >
+              <div className="max-h-60 overflow-y-auto custom-scrollbar">
+                {options.map((opt) => (
+                  <button
+                    key={opt.value}
+                    onClick={() => {
+                      onChange(opt.value);
+                      setIsOpen(false);
+                    }}
+                    className={`w-full text-left px-4 py-2.5 text-xs font-bold transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50 ${
+                      value === opt.value ? 'text-primary-600 dark:text-primary-400 bg-primary-50/50 dark:bg-primary-900/10' : 'text-slate-600 dark:text-slate-400'
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
 const ColumnContainer = ({ 
   col, 
   columnTasks, 
@@ -126,9 +196,9 @@ const ColumnContainer = ({
     <React.Fragment>
       <div
         ref={setNodeRef}
-        className={`flex-1 flex flex-col rounded-[2px] shadow-sm ${col.bgColor} p-4 md:p-6 my-2 md:my-4 transition-all duration-300 border border-slate-200 dark:border-slate-800 hover:shadow-xl hover:shadow-primary-600/5 group/column`}
+        className={`flex-1 flex flex-col rounded-[2px] shadow-sm ${col.bgColor} p-3 md:p-4 my-1 md:my-2 transition-all duration-300 border border-slate-200 dark:border-slate-800 hover:shadow-xl hover:shadow-primary-600/5 group/column`}
       >
-        <div className="flex items-start justify-between mb-4 md:mb-6 px-1">
+        <div className="flex items-start justify-between mb-3 md:mb-4 px-1">
           <div>
             <div className="flex items-center gap-2 mb-1">
               <div className={`w-2 h-2 rounded-full shadow-sm animate-pulse ${col.id === 'done' ? 'bg-emerald-500' : 'bg-primary-500'}`}></div>
@@ -156,13 +226,13 @@ const ColumnContainer = ({
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto space-y-4 px-1 custom-scrollbar">
+        <div className="flex-1 overflow-y-auto space-y-3 px-1 custom-scrollbar">
           <SortableContext
             items={columnTasks.map((t: any) => t._id)}
             strategy={verticalListSortingStrategy}
             id={col.id}
           >
-            <div className="space-y-4">
+            <div className="space-y-3">
               {columnTasks.map((task: any) => (
                 <TaskCard
                   key={task._id}
@@ -198,13 +268,17 @@ const ColumnContainer = ({
       </div>
       {/* Visual Bridge */}
       {index === 0 && (
-        <div className="hidden xl:flex flex-col items-center justify-center py-12 px-2 shrink-0">
-          <div className="h-20 w-px bg-slate-200 dark:bg-slate-800"></div>
-          <div className="w-8 h-8 rounded-full bg-slate-50 dark:bg-slate-900 shadow-inner border border-slate-200 dark:border-slate-800 flex items-center justify-center my-4">
-            <FiZap className="w-4 h-4 text-primary-500 animate-pulse" />
+        <>
+          <div className="hidden xl:flex flex-col items-center justify-center py-12 px-2 shrink-0">
+            <div className="h-20 w-px bg-slate-200 dark:bg-slate-800"></div>
+            <div className="w-8 h-8 rounded-full bg-slate-50 dark:bg-slate-900 shadow-inner border border-slate-200 dark:border-slate-800 flex items-center justify-center my-4">
+              <FiZap className="w-4 h-4 text-primary-500 animate-pulse" />
+            </div>
+            <div className="h-full w-px bg-slate-200 dark:bg-slate-800"></div>
           </div>
-          <div className="h-full w-px bg-slate-200 dark:bg-slate-800"></div>
-        </div>
+          {/* Mobile Divider */}
+          <div className="xl:hidden h-[1px] w-full bg-gradient-to-r from-transparent via-primary-500/20 to-transparent my-6"></div>
+        </>
       )}
     </React.Fragment>
   );
@@ -227,7 +301,8 @@ export default function TasksPage() {
   const { users, fetchUsers } = useUserStore();
   useSocket();
 
-  const [showBoardPanel, setShowBoardPanel] = useState(false);
+  const [showBoardDropdown, setShowBoardDropdown] = useState(false);
+  const [showSearchDropdown, setShowSearchDropdown] = useState(false);
   const [showCreateBoard, setShowCreateBoard] = useState(false);
   const [showCreateTask, setShowCreateTask] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
@@ -271,9 +346,14 @@ export default function TasksPage() {
 
   useEffect(() => {
     if (activeBoard) {
-      fetchTasks({ boardId: activeBoard._id, search: searchTerm });
+      fetchTasks({ boardId: activeBoard._id });
     }
-  }, [activeBoard, searchTerm]);
+  }, [activeBoard]);
+
+  const filteredSearchTasks = tasks.filter(t => 
+    t.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    t.description?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -475,33 +555,196 @@ export default function TasksPage() {
       {/* Header */}
           <Header
             title={
-              <button
-                onClick={() => setShowBoardPanel(true)}
-                className="flex items-center gap-2 hover:bg-primary-50 dark:hover:bg-slate-700 transition-colors rounded pr-2"
-              >
-                <span className="font-bold tracking-tight uppercase tracking-widest text-sm">{activeBoard?.name || 'Loading Boards...'}</span>
-                <FiChevronDown className="w-4 h-4 text-surface-400" />
-              </button>
+              <div className="relative">
+                <button
+                  onClick={() => setShowBoardDropdown(!showBoardDropdown)}
+                  className="flex items-center gap-2 hover:bg-primary-50 dark:hover:bg-slate-700 transition-colors rounded-[4px] px-3 py-1.5 border border-transparent hover:border-primary-200 dark:hover:border-slate-600"
+                >
+                  <span className="font-black tracking-[0.15em] uppercase text-xs text-primary-600 dark:text-primary-400">
+                    {activeBoard?.name || 'Loading Boards...'}
+                  </span>
+                  <FiChevronDown className={`w-4 h-4 text-primary-400 transition-transform ${showBoardDropdown ? 'rotate-180' : ''}`} />
+                </button>
+
+                <AnimatePresence>
+                  {showBoardDropdown && (
+                    <>
+                      <div className="fixed inset-0 z-[60]" onClick={() => setShowBoardDropdown(false)} />
+                      <motion.div
+                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                        className="absolute left-0 top-full mt-2 w-64 bg-white dark:bg-slate-900 rounded-[4px] shadow-[0_12px_32px_-4px_rgba(0,0,0,0.2)] border border-slate-200 dark:border-slate-800 z-[70] overflow-hidden"
+                      >
+                        <div className="p-2 border-b border-slate-100 dark:border-slate-800 text-[9px] font-black text-slate-400 uppercase tracking-widest bg-slate-50/50 dark:bg-slate-900/50">
+                          Switch Operations
+                        </div>
+                        <div className="max-h-60 overflow-y-auto custom-scrollbar">
+                          {boards.map((b) => (
+                            <button
+                              key={b._id}
+                              onClick={() => {
+                                setActiveBoard(b);
+                                setShowBoardDropdown(false);
+                              }}
+                              className={`w-full flex items-center justify-between px-4 py-3 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors text-left group ${activeBoard?._id === b._id ? 'bg-primary-50/50 dark:bg-primary-900/10' : ''}`}
+                            >
+                              <span className={`text-xs font-bold uppercase tracking-tight ${activeBoard?._id === b._id ? 'text-primary-600 dark:text-primary-400' : 'text-slate-700 dark:text-slate-300'}`}>
+                                {b.name}
+                              </span>
+                              {activeBoard?._id === b._id && (
+                                <div className="w-1.5 h-1.5 rounded-full bg-primary-500 animate-pulse" />
+                              )}
+                            </button>
+                          ))}
+                        </div>
+                        <button
+                          onClick={() => {
+                            setShowCreateBoard(true);
+                            setShowBoardDropdown(false);
+                          }}
+                          className="w-full flex items-center gap-3 px-4 py-3 border-t border-slate-100 dark:border-slate-800 text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/10 transition-colors text-xs font-black uppercase tracking-widest"
+                        >
+                          <FiPlus className="w-4 h-4" />
+                          New Board
+                        </button>
+                      </motion.div>
+                    </>
+                  )}
+                </AnimatePresence>
+              </div>
             }
             subtitle="Secure Archive Management Protocol"
             icon={<FiCheckSquare className="w-5 h-5 text-white" />}
+            extra={showFilters ? (
+              <div className="grid grid-cols-4 items-center gap-4 w-full">
+                <FilterDropdown 
+                  label="Priority"
+                  value={filterPriority}
+                  onChange={setFilterPriority}
+                  icon={FiFlag}
+                  options={[
+                    { label: 'All', value: 'all' },
+                    { label: 'High', value: 'high' },
+                    { label: 'Medium', value: 'medium' },
+                    { label: 'Low', value: 'low' },
+                  ]}
+                />
+                <FilterDropdown 
+                  label="Assignee"
+                  value={filterAssignee}
+                  onChange={setFilterAssignee}
+                  icon={FiUser}
+                  options={[
+                    { label: 'All', value: 'all' },
+                    ...users.map(u => ({ label: u.name, value: u._id }))
+                  ]}
+                />
+                <FilterDropdown 
+                  label="Tag"
+                  value={filterTag}
+                  onChange={setFilterTag}
+                  icon={FiTag}
+                  options={[
+                    { label: 'All', value: 'all' },
+                    ...allTags.map(tag => ({ label: tag, value: tag }))
+                  ]}
+                />
+                <div className="relative w-full">
+                  <FilterDropdown 
+                    label="Due Date"
+                    value={filterDueDate}
+                    onChange={setFilterDueDate}
+                    icon={FiCalendar}
+                    options={[
+                      { label: 'All', value: 'all' },
+                      { label: 'Overdue', value: 'overdue' },
+                      { label: 'Today', value: 'today' },
+                      { label: 'This Week', value: 'week' },
+                      { label: 'No Date', value: 'no_date' },
+                    ]}
+                  />
+                  {hasActiveFilters && (
+                    <button 
+                      onClick={resetFilters}
+                      className="absolute -bottom-5 right-0 text-[8px] font-black text-rose-500 hover:text-rose-600 dark:text-rose-400 uppercase tracking-widest transition-colors"
+                    >
+                      Clear All Filters
+                    </button>
+                  )}
+                </div>
+              </div>
+            ) : null}
           >
             {/* Search */}
             <div className="relative hidden sm:block">
               <input
                 type="text"
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search..."
-                className="pl-9 pr-4 py-2 rounded-[4px] border border-primary-100 dark:border-slate-700 bg-primary-50/50 dark:bg-slate-800 text-sm focus:ring-2 focus:ring-primary-500 outline-none w-48 md:w-64 dark:text-white transition-all"
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setShowSearchDropdown(e.target.value.length > 0);
+                }}
+                onFocus={() => searchTerm.length > 0 && setShowSearchDropdown(true)}
+                placeholder="Search Objectives..."
+                className="pl-9 pr-4 py-2 rounded-[4px] border border-primary-100 dark:border-slate-700 bg-primary-50/50 dark:bg-slate-800 text-xs focus:ring-1 focus:ring-primary-500 outline-none w-48 md:w-64 dark:text-white transition-all font-bold placeholder:text-slate-400 dark:placeholder:text-slate-600"
               />
-              <FiSearch className="absolute left-3 top-2.5 w-4 h-4 text-surface-400" />
+              <FiSearch className="absolute left-3 top-2.5 w-4 h-4 text-primary-500" />
+
+              <AnimatePresence>
+                {showSearchDropdown && searchTerm && (
+                  <>
+                    <div className="fixed inset-0 z-[60]" onClick={() => setShowSearchDropdown(false)} />
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 10 }}
+                      className="absolute right-0 top-full mt-2 w-[400px] bg-white dark:bg-slate-900 rounded-[4px] shadow-[0_20px_50px_-12px_rgba(0,0,0,0.3)] border border-slate-200 dark:border-slate-800 z-[70] overflow-hidden"
+                    >
+                      <div className="p-3 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/50">
+                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Search Sequences</span>
+                        <span className="text-[8px] font-bold text-primary-500 bg-primary-500/10 px-1.5 py-0.5 rounded-[2px]">{filteredSearchTasks.length} MATCHES</span>
+                      </div>
+                      <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
+                        {filteredSearchTasks.length > 0 ? (
+                          filteredSearchTasks.map((task) => (
+                            <button
+                              key={task._id}
+                              onClick={() => {
+                                setSelectedTask(task);
+                                setShowDetailModal(true);
+                                setShowSearchDropdown(false);
+                                setSearchTerm('');
+                              }}
+                              className="w-full p-4 hover:bg-primary-50 dark:hover:bg-primary-900/20 text-left transition-all border-b border-slate-50 dark:border-slate-800/50 last:border-0 group"
+                            >
+                              <div className="flex items-center justify-between mb-1">
+                                <span className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-tight group-hover:text-primary-600 transition-colors">{task.title}</span>
+                                <span className={`text-[8px] font-black px-1.5 py-0.5 rounded-[2px] uppercase tracking-widest border ${task.status === 'done' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-amber-500/10 text-amber-500 border-amber-500/20'}`}>
+                                  {task.status === 'done' ? 'DONE' : 'TO DO'}
+                                </span>
+                              </div>
+                              <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium line-clamp-1 truncate">
+                                {task.description || 'No operational briefing.'}
+                              </p>
+                            </button>
+                          ))
+                        ) : (
+                          <div className="p-12 text-center">
+                            <FiSearch className="w-8 h-8 text-slate-200 dark:text-slate-800 mx-auto mb-3" />
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">No matching sequences found</p>
+                          </div>
+                        )}
+                      </div>
+                    </motion.div>
+                  </>
+                )}
+              </AnimatePresence>
             </div>
 
-            {/* Filter Toggle */}
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className={`p-2 rounded-[4px] transition-colors ${hasActiveFilters ? 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300' : 'bg-surface-50 dark:bg-slate-700 text-surface-500 dark:text-slate-300 hover:bg-surface-100 dark:hover:bg-slate-600'}`}
+              className={`p-2 rounded-[4px] transition-colors ${hasActiveFilters ? 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300' : 'bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 border border-transparent hover:border-slate-200 dark:hover:border-slate-700'}`}
               title="Toggle Filters"
             >
               <FiFilter className="w-4 h-4" />
@@ -515,95 +758,9 @@ export default function TasksPage() {
             </button>
           </Header>
 
-          {/* Filter Bar */}
-          {showFilters && (
-            <div className="mb-4 p-4 bg-white dark:bg-slate-800 rounded-2xl border border-primary-100 dark:border-slate-700 shadow-sm animate-fade-in">
-              <div className="flex items-center justify-between mb-3">
-                <h4 className="text-sm font-bold text-surface-700 dark:text-white flex items-center gap-2">
-                  <FiFilter className="w-4 h-4 text-primary-500" /> Filters
-                </h4>
-                {hasActiveFilters && (
-                  <button onClick={resetFilters} className="text-xs font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400">
-                    Reset All
-                  </button>
-                )}
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                {/* Priority Filter */}
-                <div>
-                  <label className="text-[10px] font-bold text-surface-400 uppercase tracking-wider mb-1 block">
-                    <FiFlag className="w-3 h-3 inline mr-1" />Priority
-                  </label>
-                  <select
-                    value={filterPriority}
-                    onChange={(e) => setFilterPriority(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-surface-50 dark:bg-slate-700 border-none text-sm outline-none focus:ring-2 focus:ring-primary-500 dark:text-white"
-                  >
-                    <option value="all">All</option>
-                    <option value="high">High</option>
-                    <option value="medium">Medium</option>
-                    <option value="low">Low</option>
-                  </select>
-                </div>
-
-                {/* Assignee Filter */}
-                <div>
-                  <label className="text-[10px] font-bold text-surface-400 uppercase tracking-wider mb-1 block">
-                    <FiUser className="w-3 h-3 inline mr-1" />Assignee
-                  </label>
-                  <select
-                    value={filterAssignee}
-                    onChange={(e) => setFilterAssignee(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-surface-50 dark:bg-slate-700 border-none text-sm outline-none focus:ring-2 focus:ring-primary-500 dark:text-white"
-                  >
-                    <option value="all">All</option>
-                    {users.map((u) => (
-                      <option key={u._id} value={u._id}>{u.name}</option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Tag Filter */}
-                <div>
-                  <label className="text-[10px] font-bold text-surface-400 uppercase tracking-wider mb-1 block">
-                    <FiTag className="w-3 h-3 inline mr-1" />Tag
-                  </label>
-                  <select
-                    value={filterTag}
-                    onChange={(e) => setFilterTag(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-surface-50 dark:bg-slate-700 border-none text-sm outline-none focus:ring-2 focus:ring-primary-500 dark:text-white"
-                  >
-                    <option value="all">All</option>
-                    {allTags.map((tag) => (
-                      <option key={tag} value={tag}>{tag}</option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Due Date Filter */}
-                <div>
-                  <label className="text-[10px] font-bold text-surface-400 uppercase tracking-wider mb-1 block">
-                    <FiCalendar className="w-3 h-3 inline mr-1" />Due Date
-                  </label>
-                  <select
-                    value={filterDueDate}
-                    onChange={(e) => setFilterDueDate(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-surface-50 dark:bg-slate-700 border-none text-sm outline-none focus:ring-2 focus:ring-primary-500 dark:text-white"
-                  >
-                    <option value="all">All</option>
-                    <option value="overdue">Overdue</option>
-                    <option value="today">Today</option>
-                    <option value="week">This Week</option>
-                    <option value="no_date">No Date</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* 2-Column Kanban Board */}
-          <div className="flex-1 flex justify-center min-h-0 pb-4 overflow-x-auto custom-scrollbar">
-            <div className="flex w-full max-w-7xl gap-6 px-4">
+          {/* Kanban Board Container */}
+          <div className="flex-1 flex justify-center min-h-0 pb-4 overflow-y-auto md:overflow-x-auto custom-scrollbar">
+            <div className="flex flex-col md:flex-row w-full max-w-[1600px] gap-4 md:gap-6 px-4">
               <DndContext
                 sensors={sensors}
                 collisionDetection={closestCorners}
@@ -1129,42 +1286,6 @@ export default function TasksPage() {
           )}
         </AnimatePresence>
 
-        {/* Board Panel */}
-        {showBoardPanel && (
-          <div className="fixed inset-0 z-50 flex animate-fade-in">
-            {/* Backdrop */}
-            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowBoardPanel(false)}></div>
-            
-            {/* Panel */}
-            <div className="absolute right-0 top-0 h-full w-80 bg-white dark:bg-slate-800 shadow-2xl border-l border-primary-100 dark:border-slate-700 p-6 flex flex-col animate-slide-in-right">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold dark:text-white">Your Boards</h2>
-                <button onClick={() => setShowBoardPanel(false)} className="p-2 hover:bg-surface-100 dark:hover:bg-slate-700 text-surface-400 rounded transition-colors">
-                  <FiX className="w-5 h-5" />
-                </button>
-              </div>
-
-              <div className="flex-1 overflow-y-auto space-y-3 custom-scrollbar pr-2 block">
-                {boards.map((b) => (
-                  <div key={b._id} className={`group flex items-center justify-between p-3 rounded border transition-all ${activeBoard?._id === b._id ? 'bg-primary-50 dark:bg-primary-900/20 border-primary-200 dark:border-primary-800' : 'bg-white dark:bg-slate-800 border-surface-100 dark:border-slate-700 hover:border-primary-300 dark:hover:border-slate-600'}`}>
-                    <button onClick={() => { setActiveBoard(b); setShowBoardPanel(false); }} className="flex-1 text-left font-semibold text-sm text-surface-800 dark:text-slate-200">
-                      {b.name}
-                    </button>
-                    <button onClick={() => { if(confirm('Delete board?')) deleteBoard(b._id); }} className="p-1.5 text-surface-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded opacity-0 group-hover:opacity-100 transition-all">
-                      <FiTrash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-
-              <div className="pt-4 mt-auto border-t border-primary-50 dark:border-slate-700">
-                <button onClick={() => { setShowCreateBoard(true); setShowBoardPanel(false); }} className="w-full flex items-center justify-center gap-2 py-3 bg-surface-100 dark:bg-slate-700 text-surface-700 dark:text-slate-300 rounded font-bold text-sm hover:bg-surface-200 dark:hover:bg-slate-600 transition-colors">
-                  <FiPlus className="w-4 h-4" /> Create New Board
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
     </main>
   );
 }

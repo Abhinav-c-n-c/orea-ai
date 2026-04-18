@@ -5,7 +5,17 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../../store/authStore';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiMail, FiLock, FiEye, FiEyeOff, FiCheck, FiArrowRight, FiShield, FiZap, FiLayout } from 'react-icons/fi';
+import {
+  FiMail,
+  FiLock,
+  FiEye,
+  FiEyeOff,
+  FiCheck,
+  FiArrowRight,
+  FiShield,
+  FiZap,
+  FiLayout,
+} from 'react-icons/fi';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -30,7 +40,7 @@ export default function LoginPage() {
       <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-primary-100/30 dark:bg-primary-900/10 blur-[120px] pointer-events-none animate-pulse-soft"></div>
       <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-accent-100/20 dark:bg-accent-900/5 blur-[120px] pointer-events-none animate-pulse-soft"></div>
 
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: 'easeOut' }}
@@ -54,46 +64,51 @@ export default function LoginPage() {
                 className="h-20 object-contain"
               />
             </motion.div>
-            
+
             <h1 className="text-2xl md:text-3xl font-black text-white leading-tight uppercase tracking-tight mb-4">
               Organise Your <br />
               <span className="text-primary-300">Area, Intelligently.</span>
             </h1>
             <p className="text-primary-100 text-sm font-medium leading-relaxed max-w-xs mb-6 opacity-80">
-              Welcome back to your central intelligence node. Orchestrate your projects, notes, and team data with mathematical precision.
+              Welcome back to your central intelligence node. Orchestrate your projects, notes, and
+              team data with mathematical precision.
             </p>
 
             <div className="space-y-6 border-t border-white/5 pt-8 mt-4 w-full max-w-[280px]">
               {[
-                { 
-                  title: 'Secure Environment', 
+                {
+                  title: 'Secure Environment',
                   desc: 'Enterprise-grade encryption for every note and task.',
-                  icon: <FiShield className="w-5 h-5" />
+                  icon: <FiShield className="w-5 h-5" />,
                 },
-                { 
-                  title: 'Real-time Velocity', 
+                {
+                  title: 'Real-time Velocity',
                   desc: 'Instant synchronization across your entire workspace.',
-                  icon: <FiZap className="w-5 h-5" />
+                  icon: <FiZap className="w-5 h-5" />,
                 },
-                { 
-                  title: 'Infinite Workspace', 
+                {
+                  title: 'Infinite Workspace',
                   desc: 'Unlimited projects, notes, and collaborative nodes.',
-                  icon: <FiLayout className="w-5 h-5" />
-                }
+                  icon: <FiLayout className="w-5 h-5" />,
+                },
               ].map((feature, i) => (
-                <motion.div 
+                <motion.div
                   key={i}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.2 + (i * 0.1) }}
+                  transition={{ delay: 0.2 + i * 0.1 }}
                   className="flex items-start gap-4 text-left group"
                 >
                   <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-primary-300 group-hover:scale-110 group-hover:bg-primary-300 group-hover:text-sidebar transition-all duration-300">
                     {feature.icon}
                   </div>
                   <div>
-                    <h4 className="text-sm font-black text-white uppercase tracking-widest mb-1">{feature.title}</h4>
-                    <p className="text-xs text-primary-200/60 font-medium leading-relaxed">{feature.desc}</p>
+                    <h4 className="text-sm font-black text-white uppercase tracking-widest mb-1">
+                      {feature.title}
+                    </h4>
+                    <p className="text-xs text-primary-200/60 font-medium leading-relaxed">
+                      {feature.desc}
+                    </p>
                   </div>
                 </motion.div>
               ))}

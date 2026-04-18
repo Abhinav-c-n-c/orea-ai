@@ -84,9 +84,9 @@ export default function TaskCard({ task, onClick }: TaskCardProps) {
       {...attributes}
       {...listeners}
       onClick={onClick}
-      className={`bg-white dark:bg-slate-800 p-3.5 rounded-[2px] shadow-sm hover:shadow-xl border border-slate-200 dark:border-slate-800 border-l-4 ${priorityColors[task.priority as keyof typeof priorityColors] || 'border-l-slate-300'} transition-all duration-300 cursor-pointer group hover:-translate-y-0.5 ${isDragging ? 'shadow-2xl scale-[1.02] z-50 ring-2 ring-primary-400' : ''}`}
+      className={`bg-white dark:bg-slate-800 p-2.5 rounded-[4px] shadow-sm hover:shadow-xl border border-slate-200 dark:border-slate-800 border-l-4 ${priorityColors[task.priority as keyof typeof priorityColors] || 'border-l-slate-300'} transition-all duration-300 cursor-pointer group hover:-translate-y-0.5 ${isDragging ? 'shadow-2xl scale-[1.02] z-50 ring-2 ring-primary-400' : ''}`}
     >
-      <div className="flex justify-between items-start mb-2">
+      <div className="flex justify-between items-start mb-1.5">
         <div
           className={`flex items-center gap-1 px-1.5 py-0.5 rounded-[2px] text-[8px] font-black uppercase tracking-widest ${getStatusBadgeColor(task.status)}`}
         >
@@ -99,14 +99,14 @@ export default function TaskCard({ task, onClick }: TaskCardProps) {
         </div>
       </div>
 
-      <h3 className="font-black text-surface-900 dark:text-white text-[12px] mb-1 leading-tight group-hover:text-primary-600 transition-colors uppercase tracking-tight">
+      <h3 className="font-black text-surface-900 dark:text-white text-[11px] mb-0.5 leading-tight group-hover:text-primary-600 transition-colors uppercase tracking-tight">
         {task.title}
       </h3>
-      <p className="text-[10px] text-surface-400 dark:text-slate-500 font-bold uppercase tracking-tighter line-clamp-2 mb-3 leading-relaxed">
-        {task.description || 'No operational brief provided.'}
+      <p className="text-[10px] text-surface-400 dark:text-slate-500 font-bold uppercase tracking-tighter line-clamp-2 mb-2 leading-relaxed">
+        {task.description || 'No operational brief.'}
       </p>
 
-      <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800/50">
+      <div className="space-y-1.5 pt-1.5 border-t border-slate-100 dark:border-slate-800/50">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5 text-surface-400 dark:text-slate-500">
             <FiCalendar className="w-3 h-3" />

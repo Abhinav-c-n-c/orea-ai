@@ -8,6 +8,7 @@ import Switch from '@/components/Switch';
 import { FiUsers, FiArrowLeft } from 'react-icons/fi';
 import { useAuthStore } from '@/store/authStore';
 import { getInitials } from '@/utils/formatters';
+import { useUIStore } from '@/store/uiStore';
 import api from '@/lib/axios';
 import { IUser, IPermissions } from '@/types';
 
@@ -15,6 +16,7 @@ export default function UserDetailPage() {
   const { id } = useParams();
   const router = useRouter();
   const { user: currentUser } = useAuthStore();
+  const { setIsNavigating } = useUIStore();
   const [targetUser, setTargetUser] = useState<IUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -76,6 +78,13 @@ export default function UserDetailPage() {
     }
   };
 
+  const handleBack = () => {
+    setIsNavigating(true);
+    setTimeout(() => {
+      router.back();
+    }, 1200);
+  };
+
   if (isLoading) return <div className="p-8 text-center">Loading user details...</div>;
   if (!targetUser || !currentUser) return <div className="p-8 text-center">User not found</div>;
 
@@ -91,43 +100,41 @@ export default function UserDetailPage() {
   const isMember = targetUser.role === 'member';
 
   return (
-    <main className="flex-1 p-6 overflow-y-auto bg-surface-50 dark:bg-slate-950 flex flex-col gap-6">
-      <Header 
-        title="User Details" 
-        subtitle={<span className="font-medium lowercase">Managing security clearance for <span className="text-primary-600 font-black uppercase text-xs">{targetUser.name}</span></span>}
-        icon={<FiUsers className="w-5 h-5" />}
-      >
-        <button
-          onClick={() => router.back()}
-          className="mr-2 px-4 py-2 border border-primary-100 dark:border-slate-700 rounded-xl text-sm font-black uppercase tracking-widest text-surface-600 dark:text-slate-400 hover:bg-primary-50 dark:hover:bg-slate-800 transition-all flex items-center gap-2"
-        >
-          <FiArrowLeft className="w-4 h-4" />
-          Back
-        </button>
+    <main className="flex-1 p-4 md:p-6 overflow-hidden bg-surface-50 dark:bg-slate-950 flex flex-col gap-4">
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={handleBack}
+            className="p-2 bg-white dark:bg-slate-900 border border-primary-100 dark:border-slate-800 rounded-[4px] shadow-sm hover:bg-primary-50 dark:hover:bg-slate-800 transition-all text-surface-600 dark:text-slate-400"
+          >
+            <FiArrowLeft className="w-4 h-4" />
+          </button>
+          <div>
+            <h1 className="text-sm font-black text-surface-900 dark:text-white uppercase tracking-[0.2em]">
+              User Details
+            </h1>
+            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-1">
+              <span className="text-primary-600">{targetUser.name}</span>
+            </p>
+          </div>
+        </div>
 
-        {currentUser.role === 'super_admin' && !isSuperAdmin && (
-          <button
-            onClick={() => handleRoleChange(isAdmin ? 'member' : 'admin')}
-            disabled={isSaving}
-            className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
-              isAdmin
-                ? 'bg-red-50 text-red-700 border border-red-100 hover:bg-red-100'
-                : 'bg-primary-50 text-primary-700 border border-primary-100 hover:bg-primary-100'
-            }`}
-          >
-            {isAdmin ? 'Demote to Member' : 'Promote to Admin'}
-          </button>
-        )}
-        {currentUser.role === 'admin' && isMember && (
-          <button
-            onClick={() => handleRoleChange('admin')}
-            disabled={isSaving}
-            className="px-4 py-2 bg-primary-50 text-primary-700 border border-primary-100 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-primary-100 transition-all"
-          >
-            Promote to Admin
-          </button>
-        )}
-      </Header>
+        <div className="flex items-center gap-2">
+          {currentUser.role === 'super_admin' && !isSuperAdmin && (
+            <button
+              onClick={() => handleRoleChange(isAdmin ? 'member' : 'admin')}
+              disabled={isSaving}
+              className={`px-4 py-1.5 rounded-[2px] text-[9px] font-black uppercase tracking-widest transition-all ${
+                isAdmin
+                  ? 'bg-red-50 text-red-700 border border-red-100'
+                  : 'bg-primary-600 text-white shadow-lg shadow-primary-600/30'
+              }`}
+            >
+              {isAdmin ? 'Demote' : 'Promote to Admin'}
+            </button>
+          )}
+        </div>
+      </div>
 
       {(message || error) && (
         <div
@@ -141,16 +148,24 @@ export default function UserDetailPage() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-4 min-h-0">
         {/* Left Column: Profile & Info */}
-        <div className="lg:col-span-1 space-y-6">
+        <div className="lg:col-span-1 flex flex-col gap-4 h-full min-h-0">
           {/* Profile Card */}
-          <div className="bg-white dark:bg-slate-900 rounded-[4px] border border-primary-100 dark:border-slate-800 shadow-xl p-8 text-center transition-all duration-300">
-            <div className="w-24 h-24 mx-auto mb-6 rounded-[4px] bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white text-3xl font-black shadow-lg shadow-primary-500/20 transform hover:scale-105 transition-transform duration-300">
-              {getInitials(targetUser.name)}
+          <div className="flex-1 bg-white dark:bg-slate-900 rounded-[2px] border border-primary-100 dark:border-slate-800 shadow-xl p-6 flex flex-col items-center justify-center text-center transition-all duration-300 min-h-0">
+            <div className="w-24 h-24 mx-auto mb-6 rounded-[4px] bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white text-3xl font-black shadow-lg shadow-primary-500/20 transform hover:scale-105 transition-transform duration-300 overflow-hidden">
+              {targetUser.avatar ? (
+                <img src={targetUser.avatar} alt={targetUser.name} className="w-full h-full object-cover" />
+              ) : (
+                getInitials(targetUser.name)
+              )}
             </div>
-            <h3 className="font-black text-surface-900 dark:text-white text-xl uppercase tracking-tight">{targetUser.name}</h3>
-            <p className="text-xs font-bold text-surface-400 mb-6 lowercase tracking-tight">{targetUser.email}</p>
+            <h3 className="font-black text-surface-900 dark:text-white text-xl uppercase tracking-tight">
+              {targetUser.name}
+            </h3>
+            <p className="text-xs font-bold text-surface-400 mb-6 lowercase tracking-tight">
+              {targetUser.email}
+            </p>
             <span
               className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border ${
                 isSuperAdmin
@@ -165,17 +180,27 @@ export default function UserDetailPage() {
           </div>
 
           {/* Status Section */}
-          <div className="bg-white dark:bg-slate-900 rounded-[4px] border border-primary-100 dark:border-slate-800 shadow-xl p-8">
-            <h4 className="font-black text-surface-900 dark:text-white mb-6 text-[10px] uppercase tracking-widest border-b border-primary-50 dark:border-slate-800 pb-2">Account Registry</h4>
+          <div className="flex-1 bg-white dark:bg-slate-900 rounded-[2px] border border-primary-100 dark:border-slate-800 shadow-xl p-6 flex flex-col justify-center min-h-0">
+            <h4 className="font-black text-surface-900 dark:text-white mb-6 text-[10px] uppercase tracking-widest border-b border-primary-50 dark:border-slate-800 pb-2">
+              Account Registry
+            </h4>
             <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <span className="text-[10px] font-black text-surface-400 uppercase tracking-widest">Enrolled on</span>
+                <span className="text-[10px] font-black text-surface-400 uppercase tracking-widest">
+                  Enrolled on
+                </span>
                 <span className="text-xs font-bold text-surface-900 dark:text-slate-300">
-                  {new Date(targetUser.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                  {new Date(targetUser.createdAt).toLocaleDateString(undefined, {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric',
+                  })}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-[10px] font-black text-surface-400 uppercase tracking-widest">Operational Status</span>
+                <span className="text-[10px] font-black text-surface-400 uppercase tracking-widest">
+                  Operational Status
+                </span>
                 <span className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-emerald-600">
                   <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
                   Active
@@ -186,10 +211,12 @@ export default function UserDetailPage() {
         </div>
 
         {/* Right Column: Permissions */}
-        <div className="lg:col-span-2">
-          <div className="bg-white dark:bg-slate-900 rounded-[4px] border border-primary-100 dark:border-slate-800 shadow-xl p-8 h-full">
+        <div className="lg:col-span-2 h-full min-h-0">
+          <div className="bg-white dark:bg-slate-900 rounded-[2px] border border-primary-100 dark:border-slate-800 shadow-xl p-6 h-full overflow-y-auto custom-scrollbar">
             <div className="flex items-center justify-between mb-8 border-b border-primary-50 dark:border-slate-800 pb-4">
-              <h3 className="font-black text-surface-900 dark:text-white uppercase tracking-tight text-lg">Access Protocols</h3>
+              <h3 className="font-black text-surface-900 dark:text-white uppercase tracking-tight text-lg">
+                Access Protocols
+              </h3>
               {!canChangePermissions && (
                 <span className="text-[10px] font-black text-red-500 bg-red-50 border border-red-100 px-3 py-1 rounded-full uppercase tracking-widest">
                   Read-Only Mode
@@ -199,10 +226,7 @@ export default function UserDetailPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
               {Object.entries(targetUser.permissions).map(([key, value]) => (
-                <div
-                  key={key}
-                  className="flex items-center justify-between group"
-                >
+                <div key={key} className="flex items-center justify-between group">
                   <div className="flex flex-col">
                     <span className="text-[11px] font-black text-surface-900 dark:text-white uppercase tracking-widest group-hover:text-primary-600 transition-colors">
                       {key.replace(/can|([A-Z])/g, (m, g) => (g ? ` ${g}` : '')).trim()}

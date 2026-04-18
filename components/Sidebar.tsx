@@ -111,7 +111,7 @@ export default function Sidebar() {
           ) : (
             <div className="flex items-center gap-3 animate-fade-in">
               <img
-                src="https://res.cloudinary.com/dybv5ghlb/image/upload/v1775387898/orea-logo_c0dkac.png"
+                src="https://res.cloudinary.com/dybv5ghlb/image/upload/v1776542738/image_2_xzef7n.png"
                 alt="Logo Full"
                 className=" object-contain"
                 style={{ width: '90%' }}
