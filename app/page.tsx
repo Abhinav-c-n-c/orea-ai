@@ -7,7 +7,7 @@ import { useAuthStore } from '../store/authStore';
 export default function HomePage() {
   const router = useRouter();
   const { isAuthenticated, isInitialLoading, fetchUser } = useAuthStore();
-//change
+
   useEffect(() => {
     fetchUser();
   }, []);
